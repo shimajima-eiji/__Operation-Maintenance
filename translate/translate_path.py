@@ -129,6 +129,8 @@ def search_dir(dir_path):
   if not dir_path.is_dir() or not dir_path.exists():
     return {"result": False, "message": "[Stop] Illigal error!"}
 
+  file_count = 0
+
   # dir_pathはdir確定
   for result in dir_path.iterdir():
     # .gitや_configを除外
@@ -143,6 +145,8 @@ def search_dir(dir_path):
     # ファイルの場合、見つけた順番に処理する
     print(translate_file(result, ENDPOINT, True))
     file_count+=1
+
+  return file_count
 
 # multiprocessingを使うため、実行処理の書き方を変える事はできない
 if __name__ == "__main__":
@@ -161,8 +165,7 @@ if __name__ == "__main__":
 
   # ディレクトリの場合は並列処理させる
   if path.is_dir():
-    file_count=0
-    search_dir(path)
+    file_count = search_dir(path)
     print('[COMPLETE] translate_path.py: 翻訳したファイル数')
     print(file_count)
 
