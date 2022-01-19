@@ -8,7 +8,7 @@ python translate_path.py
 
 # 使用パッケージ
 pip install requests
-pip install
+pip install pathlib
 pip install git+https://github.com/alainrouillon/py-googletrans@feature/enhance-use-of-direct-api
 pip install googletrans==4.0.0-rc1
 
@@ -26,9 +26,15 @@ import requests  # pip install requests
 import json
 from googletrans import Translator  # pip install (git+https://github.com/alainrouillon/py-googletrans@feature/enhance-use-of-direct-api or googletrans==4.0.0-rc1)
 
-# 除外するファイルパターン
+# (ディレクトリ走査のみ)ファイルを書き出すパターン
 def export_pattern(file):
   return Path(str(file.parent) + "/" + file.stem + "_en" + file.suffix)
+
+# 処理対象となるファイルパターン
+def include_pattern(file):
+  # ファイル名が.や_などから始まらないもの
+  # 拡張子はtxtかmd
+  return Path(file.suffix) in ['.txt', '.md'] or not file.name[0] in ['.', '_']
 
 # コンソールからjqコマンドで加工できるようにする
 def return_json(json_value):
@@ -49,15 +55,15 @@ def translate_gas(endpoint, text):
   response = requests.post(endpoint, headers=headers, data=body)
   return response.json()
 
-# Translatorの設定
-try:
-  tr = Translator(service_urls=['translate.googleapis.com'])
-except Exception as e:
-  tr = Translator()
-
+tr = Translator(service_urls=['translate.googleapis.com'])
 # Google-Transを使って翻訳する
 def translate_googletrans(str_line):
-  return tr.translate(str_line, src="ja", dest="en").text
+  # Translatorの設定
+  try:
+    return tr.translate(str_line, src="ja", dest="en").text
+  except Exception as e:
+    tr = Translator()
+    return tr.translate(str_line, src="ja", dest="en").text
 
 # 取得したデータを出力する
 def create_file(file, data):
@@ -67,6 +73,14 @@ def create_file(file, data):
 
 # 受け取ったファイルを翻訳する
 def translate_file(file, endpoint, export_flag = False):
+  # この場合はロジックを見直す
+  if not file.is_file() or not file.exists():
+    return {"result": False, "message": "[Stop] Illigal error!"}
+
+  # 処理対象外となるファイルはスキップ
+  if not include_pattern(file):
+    return
+
   # 翻訳済みのファイルか、既に翻訳しているファイルの場合はスキップ
   if file.stem[-3:] == '_en' or file.stem[-3:] == '_ja' or export_pattern(file).is_file():
     return {"result": False, "message": "[SKIP] existed translate file."}
@@ -111,7 +125,11 @@ def translate_file(file, endpoint, export_flag = False):
   return data
 
 def search_dir(dir_path):
-  # dir_or_fileはdir確定
+  # この場合はロジックを見直す
+  if not file.is_dir() or not file.exists():
+    return {"result": False, "message": "[Stop] Illigal error!"}
+
+  # dir_pathはdir確定
   for result in dir_path.iterdir():
     # .gitや_configを除外
     if result.name[0] in ['.', '_']:
