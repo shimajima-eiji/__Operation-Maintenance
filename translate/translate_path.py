@@ -73,17 +73,25 @@ def create_file(file, data):
 
 # 受け取ったファイルを翻訳する
 def translate_file(file, endpoint, export_flag = False):
+  result = {
+    "result": False,
+    "file": str(file)
+  }
+
   # この場合はロジックを見直す
   if not file.is_file() or not file.exists():
-    return {"result": False, "message": "[Stop] Illigal error!"}
+    result['message'] = "[Stop] Illigal error!"
+    return result
 
   # 処理対象外となるファイルはスキップ
   if not include_pattern(file):
-    return {"result": False, "message": f"[SKIP] exclude translate file. [{file}]"}
+    result['message'] = f"[SKIP] exclude translate file. [{file}]"
+    return result
 
   # 翻訳済みのファイルか、既に翻訳しているファイルの場合はスキップ
   if file.stem[-3:] == '_en' or file.stem[-3:] == '_ja' or export_pattern(file).is_file():
-    return {"result": False, "message": f"[SKIP] existed translate file. [{file}]"}
+    result['message'] = f"[SKIP] existed translate file. [{file}]"
+    return result
 
   with file.open(mode='r') as f:
     data = translate_gas(endpoint, f.readlines())
@@ -122,6 +130,7 @@ def translate_file(file, endpoint, export_flag = False):
   if export_flag:
     create_file(file, data['translate'])
 
+  data['file'] = result['file']
   return data
 
 def search_dir(dir_path):
