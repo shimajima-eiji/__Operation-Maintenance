@@ -34,7 +34,7 @@ def export_pattern(file):
 def include_pattern(file):
   # ファイル名が.や_などから始まらないもの
   # 拡張子はtxtかmd
-  return Path(file.suffix) in ['.txt', '.md'] and not file.name[0] in ['.', '_']
+  return file.suffix in ['.txt', '.md'] and not file.name[0] in ['.', '_']
 
 # コンソールからjqコマンドで加工できるようにする
 def return_json(json_value):
@@ -79,11 +79,11 @@ def translate_file(file, endpoint, export_flag = False):
 
   # 処理対象外となるファイルはスキップ
   if not include_pattern(file):
-    return
+    return {"result": False, "message": f"[SKIP] exclude translate file. [{file}]"}
 
   # 翻訳済みのファイルか、既に翻訳しているファイルの場合はスキップ
   if file.stem[-3:] == '_en' or file.stem[-3:] == '_ja' or export_pattern(file).is_file():
-    return {"result": False, "message": "[SKIP] existed translate file."}
+    return {"result": False, "message": f"[SKIP] existed translate file. [{file}]"}
 
   with file.open(mode='r') as f:
     data = translate_gas(endpoint, f.readlines())
@@ -129,8 +129,6 @@ def search_dir(dir_path):
   if not dir_path.is_dir() or not dir_path.exists():
     return {"result": False, "message": "[Stop] Illigal error!"}
 
-  file_count = 0
-
   # dir_pathはdir確定
   for result in dir_path.iterdir():
     # .gitや_configを除外
@@ -143,10 +141,7 @@ def search_dir(dir_path):
       continue
 
     # ファイルの場合、見つけた順番に処理する
-    print(translate_file(result, ENDPOINT, True))
-    file_count+=1
-
-  return file_count
+    print(return_json(translate_file(result, ENDPOINT, True)))
 
 # multiprocessingを使うため、実行処理の書き方を変える事はできない
 if __name__ == "__main__":
@@ -164,9 +159,7 @@ if __name__ == "__main__":
 
   # ディレクトリの場合は並列処理させる
   elif path.is_dir():
-    file_count = search_dir(path)
-    print('[COMPLETE] translate_path.py: 翻訳したファイル数')
-    print(file_count)
+    search_dir(path)
 
   # ファイルの場合は単一処理させる
   elif path.is_file():
