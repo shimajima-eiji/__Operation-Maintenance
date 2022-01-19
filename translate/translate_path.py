@@ -126,7 +126,7 @@ def translate_file(file, endpoint, export_flag = False):
 
 def search_dir(dir_path):
   # この場合はロジックを見直す
-  if not file.is_dir() or not file.exists():
+  if not dir_path.is_dir() or not dir_path.exists():
     return {"result": False, "message": "[Stop] Illigal error!"}
 
   # dir_pathはdir確定
