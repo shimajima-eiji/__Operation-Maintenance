@@ -16,5 +16,6 @@ try:
 except Exception as e:
   tr = Translator(service_urls=['translate.googleapis.com'])
 
-print(tr.translate("テスト", src="ja", dest="en").text)
+result = tr.translate("テスト", src="ja", dest="en")
+print(result)
 # 翻訳されたtestが表示されれば成功
