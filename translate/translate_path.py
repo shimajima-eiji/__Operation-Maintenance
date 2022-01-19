@@ -141,7 +141,8 @@ def search_dir(dir_path):
       continue
 
     # ファイルの場合、見つけた順番に処理する
-    translate_file(result, ENDPOINT, True)
+    if translate_file(result, ENDPOINT, True).result:
+      file_count+=1
 
 # multiprocessingを使うため、実行処理の書き方を変える事はできない
 if __name__ == "__main__":
@@ -158,6 +159,7 @@ if __name__ == "__main__":
     print(return_json({"result": False, "error": "[STOP] {path} is not file or directory."}))
     quit()
 
+  file_count=0
   # ディレクトリの場合は並列処理させる
   if path.is_dir():
     search_dir(path)
@@ -165,4 +167,7 @@ if __name__ == "__main__":
   # ファイルの場合は単一処理させる
   if path.is_file():
     print(return_json(translate_file(path, ENDPOINT)))
+    file_count+=1
 
+  print('[COMPLETE] translate_path.py: 翻訳したファイル数')
+  print(file_count)
