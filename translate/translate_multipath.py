@@ -9,6 +9,7 @@ python translate_path.py
 
 from pathlib import Path
 import sys
+from multiprocessing import Process # need pip
 import requests  # need pip
 import json      # need pip
 from googletrans import Translator  # pip install (git+https://github.com/alainrouillon/py-googletrans@feature/enhance-use-of-direct-api or googletrans==4.0.0-rc1)
@@ -105,8 +106,8 @@ def search_dir(dir_path):
       search_dir(result)
       continue
 
-    # ファイルの場合、見つけた順番に処理する
-    translate_file(result, ENDPOINT, True)
+    # ファイルの場合、見つけた順番にマルチプロセッシングで処理する
+    Process(target=translate_file, args=[result, ENDPOINT, True]).start()
 
 # multiprocessingを使うため、実行処理の書き方を変える事はできない
 if __name__ == "__main__":
