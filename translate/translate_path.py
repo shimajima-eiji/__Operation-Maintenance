@@ -36,9 +36,13 @@ def translate_gas(endpoint, text):
   response = requests.post(endpoint, headers=headers, data=body)
   return response.json()
 
+# Translatorの設定
+try:
+  tr = Translator(service_urls=['translate.googleapis.com'])
+except Exception as e:
+  tr = Translator()
+
 # Google-Transを使って翻訳する
-tr = Translator()
-# tr = Translator(service_urls=['translate.googleapis.com'])
 def translate_googletrans(str_line):
   return tr.translate(str_line, src="ja", dest="en").text
 
