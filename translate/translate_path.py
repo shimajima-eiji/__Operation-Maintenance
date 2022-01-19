@@ -1,16 +1,29 @@
 '''
-# 使い方
+# パラメータ
 python translate_path.py
 * 1: エンドポイント
 * 2: 翻訳したいファイル
 
 日本語から英語に翻訳する事に特化している。
+
+# 使用パッケージ
+pip install requests
+pip install
+pip install git+https://github.com/alainrouillon/py-googletrans@feature/enhance-use-of-direct-api
+pip install googletrans==4.0.0-rc1
+
+# 実行例
+```
+curl -sf https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenance/main/translate/translate_path.py >run.py
+python run.py (エンドポイント) (ファイルパス)
+```
+
 '''
 
-from pathlib import Path
+from pathlib import Path # pip install pathlib
 import sys
-import requests  # need pip
-import json      # need pip
+import requests  # pip install requests
+import json
 from googletrans import Translator  # pip install (git+https://github.com/alainrouillon/py-googletrans@feature/enhance-use-of-direct-api or googletrans==4.0.0-rc1)
 
 # 除外するファイルパターン
