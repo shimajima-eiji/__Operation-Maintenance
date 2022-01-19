@@ -12,9 +12,9 @@ curl -sf https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenanc
 from googletrans import Translator
 
 try:
-  tr = Translator()
-except Exception as e:
   tr = Translator(service_urls=['translate.googleapis.com'])
+except Exception as e:
+  tr = Translator()
 
 result = tr.translate("テスト", src="ja", dest="en")
 print(result)
