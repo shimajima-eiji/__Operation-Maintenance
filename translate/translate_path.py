@@ -34,7 +34,7 @@ def export_pattern(file):
 def include_pattern(file):
   # ファイル名が.や_などから始まらないもの
   # 拡張子はtxtかmd
-  return Path(file.suffix) in ['.txt', '.md'] or not file.name[0] in ['.', '_']
+  return Path(file.suffix) in ['.txt', '.md'] and not file.name[0] in ['.', '_']
 
 # コンソールからjqコマンドで加工できるようにする
 def return_json(json_value):
