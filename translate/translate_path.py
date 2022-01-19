@@ -161,15 +161,14 @@ if __name__ == "__main__":
   path = Path(sys.argv[2])
   if not Path(path).exists():
     print(return_json({"result": False, "error": "[STOP] {path} is not file or directory."}))
-    quit()
 
   # ディレクトリの場合は並列処理させる
-  if path.is_dir():
+  elif path.is_dir():
     file_count = search_dir(path)
     print('[COMPLETE] translate_path.py: 翻訳したファイル数')
     print(file_count)
 
   # ファイルの場合は単一処理させる
-  if path.is_file():
+  elif path.is_file():
     print(return_json(translate_file(path, ENDPOINT)))
 
