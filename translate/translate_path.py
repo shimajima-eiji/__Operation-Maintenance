@@ -141,8 +141,8 @@ def search_dir(dir_path):
       continue
 
     # ファイルの場合、見つけた順番に処理する
-    if translate_file(result, ENDPOINT, True)['result']:
-      file_count+=1
+    print(translate_file(result, ENDPOINT, True))
+    file_count+=1
 
 # multiprocessingを使うため、実行処理の書き方を変える事はできない
 if __name__ == "__main__":
