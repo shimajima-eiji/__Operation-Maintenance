@@ -31,7 +31,7 @@ def translate_gas(endpoint, text):
     "text": text,
     "source": "ja",
     "target": "en",
-    "by": "wrapper_translate.py"
+    "by": "translate_path.py"
   })
 
   response = requests.post(endpoint, headers=headers, data=body)
