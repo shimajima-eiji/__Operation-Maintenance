@@ -1,8 +1,8 @@
-function language ( object )
+document.getElementById( 'source' ).addEventListener( "change", () =>
 {
-  let value = ( object.value == "ja" ) ? 0 : 1;
+  let value = ( document.getElementById( 'source' ).value == "ja" ) ? 0 : 1;
   document.getElementById( 'target' ).options[ value ].selected = true;
-}
+} );
 
 document.getElementById( 'clear' ).addEventListener( "click", () =>
 {
