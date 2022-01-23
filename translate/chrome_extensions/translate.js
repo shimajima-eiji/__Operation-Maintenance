@@ -18,17 +18,28 @@ document.getElementById( 'convert' ).addEventListener( "click", () =>
 
   const SCRIPT_ID = 'AKfycbzX_fawOiQ-7ZKfbBlVc_3GM5YSDrStUJ5oASwt_Gt7VuzQciSLT8WTA426Vhxxiq3NOg'  // https://github.com/shimajima-eiji/--GAS_v5_Translate をpullしたプロジェクトのデプロイURLを指定
   const endpoint = 'https://script.google.com/macros/s/' + SCRIPT_ID + '/exec'
-  let url = endpoint + "?text=" + text + "&source=" + source + "&target=" + target
 
-  const request = new XMLHttpRequest();
-  request.open( 'GET', url, true );
-  request.responseType = 'json';
-
-  request.onload = function ()
+  let add = ( text ) =>
   {
-    var data = this.response;
-    document.getElementById( 'convert_to' ).value = data.translate;
-  };
+    let object = document.getElementById( 'convert_to' );
+    object.value = object.value + text + '\n';
+  }
+  document.getElementById( 'convert_to' ).value = '';
+  text.split( '\n' ).forEach( ( word ) =>
+  {
+    let parameter = "?text=" + word + "&source=" + source + "&target=" + target;
+    let url = endpoint + parameter;
 
-  request.send();
+    let request = new XMLHttpRequest();
+    request.open( 'GET', url + "&by=Github Pages(Chrome Extensions)", true );
+    request.responseType = 'json';
+
+    // アロー関数にしたら怒られるのでこのままで
+    request.onload = function ()
+    {
+      add( this.response.translate );
+    };
+    request.send();
+  } );
+
 } );
