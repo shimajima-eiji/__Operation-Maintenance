@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GASにCurlして結果を返す</title>
+  </head>
+
+  <body>
+    <div>
+      <button id="convert">変換</button>
+      <button id="clear">消去</button>
+      <select id="source" onchange="language(this)">
+        <option value="ja">日本語</option>
+        <option value="en">英語</option>
+      </select>
+      <select id="target" disabled>
+        <option value="en">英語</option>
+        <option value="ja">日本語</option>
+      </select>
+    </div>
+
+    <div>
+      <textarea id="convert_from" placeholder="ここに値を入れると翻訳できます"></textarea>
+      <textarea id="convert_to" disabled></textarea>
+    </div>
+  </body>
+
+  <script src="translate.js"></script>
+
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "履歴を残しつつ翻訳",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "index.html"
+  },
+  "description": "PC版の翻訳機能っぽいUIでGASにcurlして履歴を保存する。（個人用スクリプト）"
+}
