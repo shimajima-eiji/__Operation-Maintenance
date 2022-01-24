@@ -1,5 +1,5 @@
 #!/bin/sh
-### curl -sf   | sh -s -- (ログファイル) (以降、コマンド。""で囲ってもOK)
+### curl -sf https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenance/main/for_Development/upsert_log.sh | sh -s -- (ログファイル) (以降、コマンド。""で囲ってもOK)
 ### @param
 ###   $1 : log path
 ###   $2-: Recommend: command
