@@ -41,7 +41,7 @@ def return_json(json_value):
   return json.dumps(json_value, ensure_ascii=False)
 
 # GASを使って翻訳する
-def translate_gas(endpoint, text):
+def translate_gas(endpoint, text, path):
   headers = {
     'Content-Type': 'application/json',
   }
@@ -49,7 +49,7 @@ def translate_gas(endpoint, text):
     "text": text,
     "source": "ja",
     "target": "en",
-    "by": "translate_path.py"
+    "by": f"[translate_path.py] {str(path)}"
   })
 
   response = requests.post(endpoint, headers=headers, data=body)
@@ -94,7 +94,7 @@ def translate_file(file, endpoint, export_flag = False):
     return result
 
   with file.open(mode='r') as f:
-    data = translate_gas(endpoint, f.readlines())
+    data = translate_gas(endpoint, f.readlines(), file)
 
   source_flag = False
   # data['translate']と歩調を合わせるため、enumerate
