@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[Ver1.0.0]GASのdoGet/doPostデバッガ</title>
+  </head>
+
+  <body>
+    <section>
+      <h1>文字数検出器</h1>
+      システムが検出している文字数チェックロジックとは異なるので、多くても1900文字ぐらいを目安に使ってください。
+      <p>
+        入力した文字数: <input id="view" disabled="disabled" />
+      </p>
+    </section>
+
+    <section>
+      <h2>ここに文字を貼ってください</h2>
+      <p>
+        <textarea id="words" rows="20" cols="100"></textarea>
+      </p>
+    </section>
+
+    <!-- scriptタグは外部参照にしないと動作しない -->
+    <script src="run.js"></script>
+
+    <a href="https://github.com/shimajima-eiji/__Operation-Maintenance/tree/main/for_writing" target="_blank">ソースコード</a>
+  </body>
+
+</html>

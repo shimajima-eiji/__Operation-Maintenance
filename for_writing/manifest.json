@@ -1,0 +1,9 @@
+{
+  "name": "文字数カウント",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "index.html"
+  },
+  "description": "Webフォームの文字数制限に引っかからないための、文字数チェッカー。ソースコードはhttps://github.com/shimajima-eiji/__Operation-Maintenance/tree/main/for_writing"
+}
