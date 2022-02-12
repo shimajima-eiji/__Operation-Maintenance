@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[Ver1.0.0]GASのdoGet/doPostデバッガ</title>
+</head>
+
+<body>
+  <section>
+    <h1>GASのdoGet/doPostデバッガ</h1>
+    <table>
+      <tr>
+        <th>GAS ID</th>
+        <td><input id="webhook" placeholder='IDを入力(GASのデプロイID)' size=50 /></td>
+      </tr>
+
+      <tr>
+        <th>メソッド</th>
+        <td>
+          <!-- RadioNodeListを使用するため、空フォームを作成 -->
+          <form name="methods">
+            <input type="radio" name="method" value="get" id="get" checked /><label for="get">GET</label> /
+            <input type="radio" name="method" value="post" id="post" /><label for="post">POST</label>
+          </form>
+        </td>
+      </tr>
+
+      <tr>
+        <th>パラメータ</th>
+        <td>
+          <!-- 送りたいパラメータを制御 -->
+          <form name="parameters">
+          </form>
+        </td>
+      </tr>
+
+      <tr>
+        <th></th>
+        <td>
+          <button type="button" id="add">パラメータを追加</button>
+          <button type="button" id="remove">パラメータを削除</button>
+          <button type="button" id="save">画面の状態を保存</button>
+        </td>
+      </tr>
+
+      <tr>
+        <th>
+          <button type="button" id="submit">送信</button>
+        </th>
+        <td>
+          <p id="result"></p>
+        </td>
+      </tr>
+
+    </table>
+    <br />
+
+
+  </section>
+
+  <footer>
+    <a
+      href="https://github.com/shimajima-eiji/__Operation-Maintenance/tree/main/for_development/GAS_postman">ソースコード(Github)</a>
+  </footer>
+</body>
+
+<script src="define.js"></script>
+<script src="modules.js"></script>
+<script src="run.js"></script>
+
+</html>

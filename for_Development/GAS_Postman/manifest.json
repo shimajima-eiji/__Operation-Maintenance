@@ -1,0 +1,9 @@
+{
+  "name": "GET/POSTデバッガー",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "index.html"
+  },
+  "description": "GASのGET/POSTデバッガー。ソースコードはhttps://github.com/shimajima-eiji/__Operation-Maintenance/tree/main/for_writing"
+}
