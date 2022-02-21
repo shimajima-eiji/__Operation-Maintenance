@@ -36,7 +36,24 @@ __yellow() {
   __print "[33m" "$@"
 }
 
-## 実行シェルをシバンで強制したい場合
+## よく使うカラーコードを利用するパターンを登録しておく
+__start() {
+  echo "[$(__blue Start): $1]"
+  echo ""
+}
+
+__skip() {
+  echo "[$(__yellow Skip)] $1"
+}
+
+__end() {
+  echo ""
+  echo "[$(__blue End: $1)]"
+  exit 0
+}
+
+
+# 実行シェルをシバンで強制したい場合
 __search_shell() {
   if [ $# -lt 1 ]
   then
