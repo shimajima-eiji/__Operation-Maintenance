@@ -28,6 +28,10 @@ __red() {
   __print "[31m" "$@"
 }
 
+__green() {
+  __print "[32m" "$@"
+}
+
 __blue() {
   __print "[34m" "$@"
 }
@@ -52,6 +56,9 @@ __end() {
   exit 0
 }
 
+__success() {
+  echo "[$(__green Success): $1]"
+}
 
 # 実行シェルをシバンで強制したい場合
 __search_shell() {
