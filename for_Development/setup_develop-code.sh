@@ -6,15 +6,30 @@
 当該コード内に以下を入れておく
 
 #``
-curl -sf https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenance/main/for_Development/setup_develop-code.sh >./setup_develop-code.sh
-source ./setup_develop-code.sh
-rm ./setup_develop-code.sh
+if [ ! "$(type -t __check_setup_develop_code)" = "function" ]
+then
+  curl -sf https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenance/main/for_Development/setup_develop-code.sh >./setup_develop-code.sh
+  source ./setup_develop-code.sh
+  rm ./setup_develop-code.sh
+fi
 #``
 
 ## 解説
 - shebangは意識する必要はないが、./setup_develop-code.shで/bin/shが実行できるように指定しておく
 - 敢えて白色を指定するシーンが思いつかないので、関数ではなく定数とする。なくてもいい
+
+## 参考
+- [シェルスクリプトのechoで”問題なく”色をつける(bash他対応)](https://qiita.com/ko1nksm/items/095bdb8f0eca6d327233)
+
+## READMEバージョン
+2022.02.21
+
 README
+
+# 判定ロジック用。変更しない
+__check_setup_develop_code() {
+  echo "version: 2022.02.24"
+}
 
 # 定義
 __color="\033"
@@ -52,12 +67,12 @@ __skip() {
 
 __end() {
   echo ""
-  echo "[$(__blue End: $1)]"
+  echo "[$(__blue End: ): $1]"
   exit 0
 }
 
 __success() {
-  echo "[$(__green Success): $1]"
+  echo "[$(__green Success)] $1"
 }
 
 # 実行シェルをシバンで強制したい場合
