@@ -26,7 +26,7 @@ do
   webp=${file%.*}.webp
   if [ -f "${webp}" ]
   then
-    __skip "$((__green ${file})): already webp."
+    __skip "$(__green ${file}): already webp."
     continue
   fi
 
