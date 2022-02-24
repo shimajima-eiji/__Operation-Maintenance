@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # 引数にファイルパスを受け取っていない場合は処理をしない
-if [ "$#" -lt 1 -o ! -f "$1" ]
+if [ ! -f "$1" ]
 then
   echo "[Stop] Required 1 args.(file-path)"
   echo ""
