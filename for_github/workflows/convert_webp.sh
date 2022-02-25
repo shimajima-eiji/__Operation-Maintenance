@@ -28,7 +28,7 @@ if [ ! "$(type -t __check_setup_develop_code)" = "function" ]
 then
   devtool="./__setup_develop-code.sh"
   curl -sf "https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenance/main/for_Development/setup_develop-code.sh" >"${devtool}"
-  source "${devtool}"
+  . "${devtool}"
   rm "${devtool}"
 fi
 # インストールに失敗していたら、以下の実行に失敗してしまう
