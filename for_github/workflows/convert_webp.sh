@@ -1,12 +1,12 @@
 #!/bin/sh
 
 : <<README
-# optimize_images.sh
+# convert_webp.sh
 ## 使い方
 #``
-curl -sf https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenance/main/for_github/workflows/optimize_images.sh >./__optimize_images.sh
-source ./__optimize_images.sh
-rm ./__optimize_images.sh
+curl -sf https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenance/main/for_github/workflows/convert_webp.sh >./__convert_webp.sh
+source ./__convert_webp.sh
+rm ./__convert_webp.sh
 #``
 
 ## 前提
@@ -64,15 +64,19 @@ convert_file() {
 
 : <<__main__
 pngとjpgをwebpに変換する
-既にwebpが存在する場合はスキップ
+元ファイルはbaseディレクトリへ、webpファイルはwebpディレクトリに移動する。
+既にwebpに変換している場合はスキップ
 __main__
-current="$(dirname $0)"
-convert_to="${current}/webp"
-
-for file in $(find "${current}" -maxdepth 1 -name "*.png" -or -name "*.jpg" -or -name "*.jpeg")
+for file in $(find "$(dirname $0)" -name "*.png" -or -name "*.jpg" -or -name "*.jpeg" -not -name "*/base/*")
 do
-  webp="${convert_to}/${file%.*}.webp"
-  # 既に変換されているファイルはやらない
+  current="$(dirname ${file})"
+  # baseディレクトリに移動したファイルは、変換をしているはずなので除外する
+  [ "$(basename ${current})" = "base" ] && continue
+
+  convert_to="${current}/webp"
+  webp="${convert_to}/$(basename ${file%.*}.webp)"
+
+  # webpディレクトリに存在しているファイル名は変換済みなので除外する
   if [ -f "${webp}" ]
   then
     __skip "$(__green ${file}): already webp."
