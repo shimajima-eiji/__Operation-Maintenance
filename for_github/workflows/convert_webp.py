@@ -218,12 +218,13 @@ def __main(path):
 
 # マルチプロセスで__mp_main__から実行されるので、これを回避するため必須
 if __name__ == "__main__":
-    print(f"[{__Color.blue('Start')}: {Path(__file__).parent}]")
+    print(f"[{__Color.blue('Start')}: {sys.argv[0]}]")
     print()
 
     p = Pool(os.cpu_count())
 
     # 引数があればそれを、なければこのファイルと同じディレクトリを走査
+    # `curl | python`で実施した場合、else時はカレントディレクトリを返す
     path = Path(sys.argv[1]) if(len(sys.argv) > 1) else Path(__file__).parent
 
     # パスが画像ファイルならピンポイントに変換
