@@ -74,12 +74,6 @@ def __watermark(base):
             "angle": 30,
         },
 
-        # IMAGES.font用の設定情報
-        "font": {
-            "family": 'fonts/Arial Black.ttf',
-            "size": 16,
-        },
-
         # IMAGES.draw用の設定情報
         "draw": {
             "color": (255, 255, 255),  # 文字色
@@ -101,19 +95,13 @@ def __watermark(base):
     WATERMARK_IMAGES.text = Image.new(PARAMETER.text.mode,
                                       PARAMETER.text.square, PARAMETER.text.rbga)
     WATERMARK_IMAGES.draw = ImageDraw.Draw(WATERMARK_IMAGES.text)
-    WATERMARK_IMAGES.font = ImageFont.truetype(
-        font=PARAMETER.font.family, size=PARAMETER.font.size)
 
     # 文字の横幅、縦幅を取得し、マージン幅を確定する
-    textsize = WATERMARK_IMAGES.draw.textsize(
-        PARAMETER.url, font=WATERMARK_IMAGES.font)
+    textsize = WATERMARK_IMAGES.draw.textsize(PARAMETER.url)
     PARAMETER.watermark.margin.x *= int(textsize[0])
     PARAMETER.watermark.margin.y *= int(textsize[1])
 
-    position = Box({
-        "x": None,
-        "y": None,
-    })
+    position = Box({})
     # 画像内にウォーターマークをループして書き込む
     # x座標とy座標を取得し、順番にテキストを描画する
     for x_loop in range(math.floor(WATERMARK_IMAGES.text.width / PARAMETER.watermark.margin.x)):
@@ -127,7 +115,6 @@ def __watermark(base):
             WATERMARK_IMAGES.draw.text(
                 square,
                 PARAMETER.url,
-                font=WATERMARK_IMAGES.font,
                 fill=PARAMETER.draw.color + (PARAMETER.draw.opacity,)
             )
 
@@ -205,6 +192,8 @@ def __main(path):
     # 既にwebpが存在する場合はやらない。前段
     if(path.with_suffix(".webp").is_file() or webp.is_file()):
         return False
+
+    print(f"[Run] {path}")
 
     # 格納先のディレクトリを作成
     base = Path(path.parent / "base" / path.name)
