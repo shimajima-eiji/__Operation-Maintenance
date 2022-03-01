@@ -225,7 +225,7 @@ if __name__ == "__main__":
 
     # 引数があればそれを、なければこのファイルと同じディレクトリを走査
     # `curl | python`で実施した場合、else時はカレントディレクトリを返す
-    path = Path(sys.argv[1]) if(len(sys.argv) > 1) else Path(__file__).cwd()
+    path = Path(sys.argv[1]) if(len(sys.argv) > 1) else Path(__file__).parent
 
     # パスが画像ファイルならピンポイントに変換
     execute_suffix = [".jpg", ".jpeg", ".png", ".git", ".bmp"]
