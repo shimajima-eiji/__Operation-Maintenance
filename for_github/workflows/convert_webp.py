@@ -234,15 +234,12 @@ if __name__ == "__main__":
 
     # パスがディレクトリなら以下ファイルを検索する。
     elif(path.is_dir()):
+        print(f"[{__Color.white('Information')}] ディレクトリサーチ: {path}")
+
         # 画像ファイル以外と、baseディレクトリのファイルは除外する。
         # 既に変換されているかサーチして処理するのが手間だったので、convert内で実施している
-        # result = [p.map(__main, [file for file in path.glob(
-        #     '**/*') if re.search(f"/*({'|'.join(execute_suffix)})", str(file)) if file.parent.name != "base"])][0]
-
-        # デバッグ用
-        result = [__main(p) for p in path.glob(
-            '**/*') if re.search('/*\.(jpg|jpeg|png|gif|bmp)', str(p)) if p.parent.name != "base"]
-
+        result = [p.map(__main, [file for file in path.glob(
+            '**/*') if re.search(f"/*({'|'.join(execute_suffix)})", str(file)) if file.parent.name != "base"])][0]
         if len(result) == result.count(False):
             print(
                 f"[{__Color.white('Information')}] ディレクトリパスは既に変換済みか、ファイルがない: [{path}]")
