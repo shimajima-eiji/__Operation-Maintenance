@@ -187,8 +187,11 @@ def __create_image(path, to):
     # リサイズ時に縦画像を横に変換してしまうため、回転処理を入れる。
     # 回転処理は元画像のexif情報から取得する
     exif = base._getexif()
-    orientation = exif.get(0x112, 1)
-    webp = ROTATE[orientation](webp)
+
+    # exifが取れた時は回転させる
+    if not exif is None:
+        orientation = exif.get(0x112, 1)
+        webp = ROTATE[orientation](webp)
 
     # ウォーターマークを入れる
     webp = __watermark(webp)
@@ -203,7 +206,7 @@ def __main(path):
     if(path.with_suffix(".webp").is_file() or webp.is_file()):
         return False
 
-    print(f"[Run] {path}")
+    # 格納先のディレクトリを作成
     base = Path(path.parent / "base" / path.name)
     base.parent.mkdir(exist_ok=True)
     webp.parent.mkdir(exist_ok=True)
@@ -218,7 +221,8 @@ def __main(path):
 
 # マルチプロセスで__mp_main__から実行されるので、これを回避するため必須
 if __name__ == "__main__":
-    print(f"[{__Color.blue('Start')}: {sys.argv[0]}]")
+    filename = sys.argv[0] if sys.argv[0] != "" else "curl script"
+    print(f"[{__Color.blue('Start')}: {filename}]")
     print()
 
     p = Pool(os.cpu_count())
@@ -228,13 +232,14 @@ if __name__ == "__main__":
     path = Path(sys.argv[1]) if(len(sys.argv) > 1) else Path(__file__).parent
 
     # パスが画像ファイルならピンポイントに変換
-    execute_suffix = [".jpg", ".jpeg", ".png", ".git", ".bmp"]
+    execute_suffix = [".jpg", ".JPG", ".jpeg", "JPEG",
+                      ".png", ".PNG", ".gif", ".GIF", ".bmp", ".BMP"]
     if(path.is_file() and path.suffix in execute_suffix):
         __main(path)
 
     # パスがディレクトリなら以下ファイルを検索する。
     elif(path.is_dir()):
-        print(f"[{__Color.white('Information')}] ディレクトリサーチ: {path}")
+        print(f"[{__Color.white('Information')}] ディレクトリサーチ: {path.resolve()}")
 
         # 画像ファイル以外と、baseディレクトリのファイルは除外する。
         # 既に変換されているかサーチして処理するのが手間だったので、convert内で実施している
@@ -242,11 +247,11 @@ if __name__ == "__main__":
             '**/*') if re.search(f"/*({'|'.join(execute_suffix)})", str(file)) if file.parent.name != "base"])][0]
         if len(result) == result.count(False):
             print(
-                f"[{__Color.white('Information')}] ディレクトリパスは既に変換済みか、ファイルがない: [{path}]")
+                f"[{__Color.white('Information')}] ディレクトリパスは既に変換済みか、ファイルが存在しない]")
 
     # 画像ではないファイルか、ファイルでもディレクトリでもない場合
     else:
         print(f"[{__Color.yellow('Skip')}] 不正なパス: {path}")
 
     print()
-    print(f"[{__Color.blue('End')}: {sys.argv[0]}]")
+    print(f"[{__Color.blue('End')}: {filename}]")
