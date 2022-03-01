@@ -224,6 +224,7 @@ if __name__ == "__main__":
     p = Pool(os.cpu_count())
 
     # 引数があればそれを、なければこのファイルと同じディレクトリを走査
+    # curlで実行した場合、else時の出力はカレントパスになる
     path = Path(sys.argv[1]) if(len(sys.argv) > 1) else Path(__file__).parent
 
     # パスが画像ファイルならピンポイントに変換
