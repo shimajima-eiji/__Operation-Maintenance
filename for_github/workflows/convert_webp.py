@@ -181,7 +181,8 @@ def __create_image(path, to):
         webp = ROTATE[orientation](webp)
 
     # ウォーターマークを入れる
-    webp = __watermark(webp)
+    if path.parent.name != "nomark":
+        webp = __watermark(webp)
 
     # webpに変換して保存する
     webp.save(to, 'webp', quality=95, optimize=True)
@@ -192,7 +193,6 @@ def __main(path):
     # 既にwebpが存在する場合はやらない。前段
     if(path.with_suffix(".webp").is_file() or webp.is_file()):
         return False
-
     print(f"[Run] {path}")
 
     # 格納先のディレクトリを作成
@@ -210,15 +210,14 @@ def __main(path):
 
 # マルチプロセスで__mp_main__から実行されるので、これを回避するため必須
 if __name__ == "__main__":
-    filename = sys.argv[0] if sys.argv[0] != "" else "curl script"
+    # 引数処理
+    # `curl | python`で実施した場合、else時はカレントディレクトリを返す
+    filename = sys.argv[0] if len(sys.argv) > 0 else "curl script"
+    # 引数があればそれを、なければこのファイルと同じディレクトリを走査
+    path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).parent
+
     print(f"[{__Color.blue('Start')}: {filename}]")
     print()
-
-    p = Pool(os.cpu_count())
-
-    # 引数があればそれを、なければこのファイルと同じディレクトリを走査
-    # `curl | python`で実施した場合、else時はカレントディレクトリを返す
-    path = Path(sys.argv[1]) if(len(sys.argv) > 1) else Path(__file__).parent
 
     # パスが画像ファイルならピンポイントに変換
     execute_suffix = [".jpg", ".JPG", ".jpeg", "JPEG",
@@ -232,6 +231,7 @@ if __name__ == "__main__":
 
         # 画像ファイル以外と、baseディレクトリのファイルは除外する。
         # 既に変換されているかサーチして処理するのが手間だったので、convert内で実施している
+        p = Pool(os.cpu_count())
         result = [p.map(__main, [file for file in path.glob(
             '**/*') if re.search(f"/*({'|'.join(execute_suffix)})", str(file)) if file.parent.name != "base"])][0]
         if len(result) == result.count(False):
