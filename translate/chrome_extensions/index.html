@@ -1,39 +1,39 @@
 <!DOCTYPE html>
 <html lang="ja">
 
-  <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>[Ver1.0.0]GASにCurlして結果を返す</title>
-  </head>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[Ver2.0.0]GASにCurlして結果を返す</title>
+</head>
 
-  <body>
-    <div>
-      <button id="convert">変換</button>
-      <button id="clear">消去</button>
-      <select id="source">
-        <option value="ja">日本語</option>
-        <option value="en">英語</option>
-      </select>
-      <select id="target" disabled>
-        <option value="en">英語</option>
-        <option value="ja">日本語</option>
-      </select>
-    </div>
+<body>
+  <div>
+    <button id="convert">変換</button>
+    <button id="clear">消去</button>
+    <select id="source">
+      <option value="ja">日本語</option>
+      <option value="en">英語</option>
+    </select>
+    <select id="target" disabled>
+      <option value="en">英語</option>
+      <option value="ja">日本語</option>
+    </select>
+  </div>
 
-    <div>
-      <textarea id="convert_from" placeholder="翻訳履歴検索中…"></textarea>
-      <textarea id="convert_to" placeholder="翻訳履歴検索中…" disabled></textarea>
-    </div>
+  <div>
+    <textarea id="convert_from" placeholder="翻訳履歴検索中…" rows="10"></textarea>
+    <textarea id="convert_to" placeholder="翻訳履歴検索中…" rows="10" disabled></textarea>
+  </div>
 
-    <div>
-      <a
-        href="https://github.com/shimajima-eiji/__Operation-Maintenance/tree/main/translate/chrome_extensions">ソースコード(Github)</a>
-    </div>
+  <div>
+    <a
+      href="https://github.com/shimajima-eiji/__Operation-Maintenance/tree/main/translate/chrome_extensions">ソースコード(Github)</a>
+  </div>
 
-  </body>
+</body>
 
-  <script src="translate.js"></script>
+<script src="translate.js"></script>
 
 </html>
