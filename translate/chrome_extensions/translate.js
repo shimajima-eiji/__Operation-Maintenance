@@ -1,63 +1,64 @@
-document.getElementById( 'source' ).addEventListener( "change", () =>
-{
-  let value = ( document.getElementById( 'source' ).value == "ja" ) ? 0 : 1;
-  document.getElementById( 'target' ).options[ value ].selected = true;
-} );
+/**
+ * 定義
+ */
+const GAS_ID = "(https://github.com/shimajima-eiji/--GAS_v5_Translate をpullしたプロジェクトのデプロイURL)"
 
-document.getElementById( 'clear' ).addEventListener( "click", () =>
-{
-  document.getElementById( 'convert_from' ).value = '';
-} );
+const endpoint = `https://script.google.com/macros/s/${GAS_ID}/exec`
+let __getEBI = (id) => document.getElementById(id);
+let source = __getEBI('source')
+let target = __getEBI('target')
+let clear = __getEBI('clear')
+let convert = __getEBI('convert')
+let from = __getEBI('convert_from')
+let to = __getEBI('convert_to')
 
-document.getElementById( 'convert' ).addEventListener( "click", () =>
-{
-  document.getElementById( 'convert_to' ).placeholder = '翻訳中…';
-  let get_value = ( id ) => document.getElementById( id ).value;
-  let text = get_value( "convert_from" );
-  let source = get_value( "source" );
-  let target = get_value( "target" );
+/**
+ * 実行
+ */
 
-  const SCRIPT_ID = 'AKfycbzX_fawOiQ-7ZKfbBlVc_3GM5YSDrStUJ5oASwt_Gt7VuzQciSLT8WTA426Vhxxiq3NOg'  // https://github.com/shimajima-eiji/--GAS_v5_Translate をpullしたプロジェクトのデプロイURLを指定
-  const endpoint = 'https://script.google.com/macros/s/' + SCRIPT_ID + '/exec'
+// [TODO] 日本語・英語以外の追加。HTML側も追記する
+source.addEventListener("change", () => {
+  let value = (source.value == "ja") ? 0 : 1;
+  target.options[value].selected = true;
+});
 
-  let add = ( text ) =>
-  {
-    let object = document.getElementById( 'convert_to' );
-    object.value = object.value + text + '\n';
+// 消去ボタン
+clear.addEventListener("click", () => from.value = '');
+
+// 変換ボタン
+convert.addEventListener("click", async () => {
+  // 翻訳できるまで待機中メッセージを表示
+  to.placeholder = '翻訳中…';
+
+  // 可変部分はtextだけなので、雛形を作っておく
+  const fix_url = `${endpoint}?source=${source.value}&target=${target.value}&by=自分で拡張機能を使った&text=`
+
+  // forEachを非同期処理するが、一番最後の処理だけ実施させるため上限値を設定
+  let results = []
+  let values = from.value.split('\n')
+
+  values.forEach(async (word, index) => {
+    const response = await fetch(`${fix_url}${word}`);
+    let result = await response.json();
+
+    // 非同期だが順番があるのでarray.pushにせず、indexで管理する
+    results[index] = result.translate;
+    // 最後の処理の時だけ処理させる
+    if (results.length == values.length)
+      to.value = results.join('\n');
+  });
+});
+
+(async () => {
+  const response = await fetch(`${endpoint}?extension=true`);
+  let result = await response.json();
+
+  from.placeholder = "ここに翻訳したい文字を入力";
+  if (result == null) {
+    to.placeholder = "ここに翻訳された文字を表示";
+    return;
   }
-  document.getElementById( 'convert_to' ).value = '';
-  text.split( '\n' ).forEach( ( word ) =>
-  {
-    let parameter = "?text=" + word + "&source=" + source + "&target=" + target;
-    let url = endpoint + parameter;
 
-    let request = new XMLHttpRequest();
-    request.open( 'GET', url + "&by=Github Pages(Chrome Extensions)", true );
-    request.responseType = 'json';
-
-    // アロー関数にしたら怒られるのでこのままで
-    request.onload = function ()
-    {
-      add( this.response.translate );
-    };
-    request.send();
-  } );
-
-} );
-
-function setup ()
-{
-  const SCRIPT_ID = 'AKfycbzX_fawOiQ-7ZKfbBlVc_3GM5YSDrStUJ5oASwt_Gt7VuzQciSLT8WTA426Vhxxiq3NOg'  // https://github.com/shimajima-eiji/--GAS_v5_Translate をpullしたプロジェクトのデプロイURLを指定
-  const endpoint = 'https://script.google.com/macros/s/' + SCRIPT_ID + '/exec?extension=true'
-
-  let request = new XMLHttpRequest();
-  request.open( 'GET', endpoint, true );
-  request.responseType = 'json';
-  request.onload = function ()
-  {
-    document.getElementById( 'convert_from' ).value = this.response.text;
-    document.getElementById( 'convert_to' ).value = this.response.translate
-  };
-  request.send();
-}
-setup();
+  from.value = result.text;
+  to.value = result.translate;
+})();
