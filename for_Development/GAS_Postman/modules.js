@@ -1,6 +1,8 @@
 // 定義ブロック。複数箇所で使っているものは管理のため集約
 let getEBI = (id) => document.getElementById(id);
-
+let gas = (gas_id) => {
+  return (gas_id.substr(0, 4) == "http") ? gas_id : `https://script.google.com/macros/s/${gas_id}/exec`;
+}
 /**
  * fetch関数
  * @param
@@ -11,21 +13,21 @@ let getEBI = (id) => document.getElementById(id);
  * @returns
  * - JSON: GET=出力結果 / POST={}
  */
-let run_fetch = async (method, gas_id, params) => {
-  endpoint = `https://script.google.com/macros/s/${gas_id}/exec`;
+let run_fetch = async (method, endpoint, params) => {
   let result = {};
 
   // post時は第二引数にオプションを付与する。GASの仕様で値を受け取ることはできない。(GAS側でpostした値を処理する事はできる)
+  // Ref: https://qiita.com/khidaka/items/ebf770591100b1eb0eff
+  // Ref: https://www.sambaiz.net/article/319/
   if (method == "post") {
-    result = await fetch(endpoint, {
-      mode: "no-cors",
+    let request = await fetch(endpoint, {
       method: "post",
       body: JSON.stringify(params),
       headers: {
-        Accept: "application/json",
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
     });
+    result = await request.json();
 
     // get時はURLにパラメータを追記し、resultに格納する
   } else {
