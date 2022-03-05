@@ -33,20 +33,10 @@ convert.addEventListener("click", async () => {
   // 可変部分はtextだけなので、雛形を作っておく
   const fix_url = `${endpoint}?source=${source.value}&target=${target.value}&by=自分で拡張機能を使った&text=`
 
-  // forEachを非同期処理するが、一番最後の処理だけ実施させるため上限値を設定
-  let results = []
-  let values = from.value.split('\n')
-
-  values.forEach(async (word, index) => {
-    const response = await fetch(`${fix_url}${word}`);
-    let result = await response.json();
-
-    // 非同期だが順番があるのでarray.pushにせず、indexで管理する
-    results[index] = result.translate;
-    // 最後の処理の時だけ処理させる
-    if (results.length == values.length)
-      to.value = results.join('\n');
-  });
+  const fix_url = `${endpoint}?source=${source.value}&target=${target.value}&by=自分で拡張機能を使った&text=${from.value.split('\n').join('&text=')}`
+  const response = await fetch(fix_url);
+  let result = await response.json();
+  to.value = result.translates.join('\n');
 });
 
 (async () => {
