@@ -31,7 +31,7 @@ convert.addEventListener("click", async () => {
   to.placeholder = '翻訳中…';
 
   // 可変部分はtextだけなので、雛形を作っておく
-  const fix_url = `${endpoint}?source=${source.value}&target=${target.value}&by=自分で拡張機能を使った&text=${from.value.split('\n').join('&text=')}`
+  const fix_url = `${endpoint}?source=${source.value}&target=${target.value}&by=Operation-Maintenanceで使用&text=${from.value.split('\n').join('&text=')}`
   const response = await fetch(fix_url);
   let result = await response.json();
   to.value = result.translates.join('\n');
