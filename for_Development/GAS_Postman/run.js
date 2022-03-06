@@ -41,5 +41,5 @@ getEBI("submit").addEventListener("click", async () =>       // 送信
   if (!SCRIPT_ID) return;
 
   const response = await run_fetch(document.methods.method.value, gas(SCRIPT_ID), set_param());
-  getEBI("result").innerText = JSON.stringify(response);                        // result
+  getEBI("result").innerText = JSON.stringify(response);     // result
 });
