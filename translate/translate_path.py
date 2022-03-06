@@ -1,5 +1,5 @@
-'''
-# パラメータ
+"""
+# 引数
 python translate_path.py
 * 1: エンドポイント
 * 2: 翻訳したいファイル
@@ -7,170 +7,139 @@ python translate_path.py
 日本語から英語に翻訳する事に特化している。
 
 # 使用パッケージ
-pip install requests
-pip install pathlib
-pip install git+https://github.com/alainrouillon/py-googletrans@feature/enhance-use-of-direct-api
-pip install googletrans==4.0.0-rc1
+- requests
+- pathlib
 
 # 実行例
 ```
 curl -sf https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenance/main/translate/translate_path.py >run.py
-python run.py (エンドポイント) (ファイルパス)
+python run.py (エンドポイント)
 ```
 
-'''
+"""
 
-from pathlib import Path # pip install pathlib
+from pathlib import Path  # pip install pathlib
 import sys
 import requests  # pip install requests
-import json
-from googletrans import Translator  # pip install (git+https://github.com/alainrouillon/py-googletrans@feature/enhance-use-of-direct-api or googletrans==4.0.0-rc1)
 
-# (ディレクトリ走査のみ)ファイルを書き出すパターン
-def export_pattern(file):
-  return Path(str(file.parent) + "/" + file.stem + "_en" + file.suffix)
+"""
+定義
+"""
 
-# 処理対象となるファイルパターン
-def include_pattern(file):
-  # ファイル名が.や_などから始まらないもの
-  # 拡張子はtxtかmd
-  return file.suffix in ['.txt', '.md'] and not file.name[0] in ['.', '_']
 
-# コンソールからjqコマンドで加工できるようにする
-def return_json(json_value):
-  return json.dumps(json_value, ensure_ascii=False)
+def create_body(text, path):
+    """
+    curl用のリクエストボディテンプレート
+    """
+    return {
+        "text": text,
+        "source": "ja",
+        "target": "en",
+        "by": f"[translate.py] {str(path)}"
+    }
 
-# GASを使って翻訳する
-def translate_gas(endpoint, text, path):
-  headers = {
-    'Content-Type': 'application/json',
-  }
-  body = json.dumps({
-    "text": text,
-    "source": "ja",
-    "target": "en",
-    "by": f"[translate_path.py] {str(path)}"
-  })
 
-  response = requests.post(endpoint, headers=headers, data=body)
-  return response.json()
+"""
+関数
+"""
 
-# Google-Transを使って翻訳する
-def translate_googletrans(str_line):
-  # Translatorの設定
-  try:
-    tr = Translator(service_urls=['translate.googleapis.com'])
-    return tr.translate(str_line, src="ja", dest="en").text
-  except Exception as e:
-    tr = Translator()
-    return tr.translate(str_line, src="ja", dest="en").text
 
-# 取得したデータを出力する
-def create_file(file, data):
-  with export_pattern(file).open('w') as f:
-    for translated in data:
-      f.write(translated)
+def curl(text, path):
+    """
+    cleansingのサブルーチン
+    """
+    global GAS_ID
+    endpoint = f"https://script.google.com/macros/s/{GAS_ID}/exec"
 
-# 受け取ったファイルを翻訳する
-def translate_file(file, endpoint, export_flag = False):
-  result = {
-    "result": False,
-    "file": str(file)
-  }
+    try:
+        return requests.get(endpoint, params=create_body(
+            text.encode("utf-8"), path)).json()["translate"]
+    except:
+        return text
 
-  # この場合はロジックを見直す
-  if not file.is_file() or not file.exists():
-    result['message'] = "[Stop] Illigal error!"
-    return result
 
-  # 処理対象外となるファイルはスキップ
-  if not include_pattern(file):
-    result['message'] = f"[SKIP] exclude translate file. [{file}]"
-    return result
+def cleansing(word, source, skip, path):
+    """
+    テキスト（行）をクレンジングする
+    translateのサブルーチン
+    """
+    if(
+        skip
+        or source
+        or len(word) == 0
 
-  # 翻訳済みのファイルか、既に翻訳しているファイルの場合はスキップ
-  if file.stem[-3:] == '_en' or file.stem[-3:] == '_ja' or export_pattern(file).is_file():
-    result['message'] = f"[SKIP] existed translate file. [{file}]"
-    return result
+        # 最初の文字が#や-から始まるケースはエラーになるため、エスケープする
+        or word[0] in ["#", "-"]
 
-  with file.open(mode='r') as f:
-    data = translate_gas(endpoint, f.readlines(), file)
+        # URLは翻訳する必要がないのでスキップ
+        or word[:7] == "http://"
+        or word[:8] == "https://"
+    ):
+        return word
 
-  source_flag = False
-  # data['translate']と歩調を合わせるため、enumerate
-  for index, line in enumerate(data['text']):
-    str_line = line.strip()
+    # テーブル内を一括変換してしまうので切り分ける
+    if(word[0] == "|"):
+        return "|".join([cleansing(table, False, False, path) for table in word.split("|")])
 
-    # ソースコード判定
-    if str_line == '```':
-      source_flag = not source_flag
-      data['translate'][index] = line
-      continue
+    # 文中にコードが含まれる場合は翻訳しないように制御
+    if("`" in word):
+        return "`".join([cleansing(w, index % 2 == 1, False, path) for index, w in enumerate(word.split("`"))])
 
-    # 改行やソースコードは翻訳しない
-    elif source_flag or str_line == '':
-      data['translate'][index] = line
-      continue
+    return curl(word, path)
 
-    # hタグは翻訳後おかしくなるのでGoogle Transを使用
-    elif str_line[0] == '#' and str_line[1] == ' ' or data['translate'][index].strip() == '':
-      # result = tr.translate(text=str_line, src="ja", dest="en")
-      data['translate'][index] = translate_googletrans(str_line) + "\n"
 
-    # GASで翻訳に失敗している場合はGoogleTransで再翻訳する
-    elif data['translate'][index].strip() == '' and str_line.strip() == '':
-      data['translate'][index] = translate_googletrans(str_line) + "\n"
+def translate(text, path):
+    """
+    翻訳処理
+    execute_fileのサブルーチン
+    """
+    global skip
+    source = False
 
-    # リストを変換すると'--'に置き換えられるので手動で差し戻す
-    tmp = data['translate'][index].strip()
-    if tmp[0] == '-' and tmp[1] == '-':
-      data['translate'][index] = data['translate'][index].replace('--', '- ')
+    # codeタグの開始/終了
+    if text == "```":
+        skip = not skip
 
-  # ディレクトリサーチ（マルチプロセッシング）の場合はファイルを作る
-  if export_flag:
-    create_file(file, data['translate'])
+    if len(text) > 0 and text[-1] == "`":
+        source = True
 
-  data['file'] = result['file']
-  return data
+    return " ".join([cleansing(split, skip, source, path)
+                     for split in text.strip().split(" ")])
 
-def search_dir(dir_path):
-  # この場合はロジックを見直す
-  if not dir_path.is_dir() or not dir_path.exists():
-    return {"result": False, "message": "[Stop] Illigal error!"}
 
-  # dir_pathはdir確定
-  for result in dir_path.iterdir():
-    # .gitや_configを除外
-    if result.name[0] in ['.', '_']:
-      continue
+def execute_file(path):
+    """
+    ファイル読み込み・書き込み
+    """
+    with path.open(mode='r') as ja:
+        with (path.parent / path.with_name(path.stem + "_en" + path.suffix)).open(mode="w") as en:
+            [en.write(translated + "\n") for translated in [translate(
+                line.strip(), path) for line in ja.readlines()]]
 
-    # ディレクトリの場合、再起処理
-    if result.is_dir():
-      search_dir(result)
-      continue
 
-    # ファイルの場合、見つけた順番に処理する
-    print(return_json(translate_file(result, ENDPOINT, True)))
+def check_file(path):
+    """
+    条件処理用
+    既に翻訳済み(_en)のファイルが存在したり、翻訳済みのファイルは除外する
+    """
+    return path.stem[-3:] != "_en" and not Path(f"{path.parent}/{path.stem}_en.md").is_file()
 
-# multiprocessingを使うため、実行処理の書き方を変える事はできない
+
 if __name__ == "__main__":
-  # 引数がなければ実行しない
-  if len(sys.argv) <= 2:
-    print(return_json({"result": False, "error": "[STOP] Required (*endpoint) (*path)"}))
-    quit()
+    if(len(sys.argv) < 2 or sys.argv[1][:7] == "http://" or sys.argv[1][:8] == "https://"):
+        print(f"[Stop translate_path.py] Required args(curl URL)")
+        quit()
 
-  ENDPOINT = sys.argv[1]
+    GAS_ID = sys.argv[1]
+    skip = False
 
-  # パスが存在しない場合は実行しない
-  path = Path(sys.argv[2])
-  if not Path(path).exists():
-    print(return_json({"result": False, "error": "[STOP] {path} is not file or directory."}))
+    # 入力値が存在するパスなら採用、それ以外の場合はカレントパスを採用
+    path = Path(sys.argv[2]) if len(sys.argv) > 2 and (Path(
+        sys.argv[2]).is_dir() or Path(sys.argv[2]).is_file()) else Path(__file__).parent
 
-  # ディレクトリの場合は並列処理させる
-  elif path.is_dir():
-    search_dir(path)
+    if(path.is_file() and check_file(path)):
+        execute_file(path)
 
-  # ファイルの場合は単一処理させる
-  elif path.is_file():
-    print(return_json(translate_file(path, ENDPOINT)))
-
+    # 存在しないパスやファイルを指定しても件数なしで処理される
+    [execute_file(result) for result in Path(
+        path).glob("**/*.md") if(check_file(result))]
