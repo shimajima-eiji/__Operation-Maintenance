@@ -193,7 +193,7 @@ def __main(path):
     # 既にwebpが存在する場合はやらない。前段
     if(path.with_suffix(".webp").is_file() or webp.is_file()):
         return False
-    print(f"[Run] {path}")
+    print(f"[Run] {f}")
 
     # 格納先のディレクトリを作成
     base = Path(path.parent / "base" / path.name)
@@ -214,7 +214,8 @@ if __name__ == "__main__":
     # `curl | python`で実施した場合、else時はカレントディレクトリを返す
     filename = sys.argv[0] if len(sys.argv) > 0 else "curl script"
     # 引数があればそれを、なければこのファイルと同じディレクトリを走査
-    path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).parent
+    current = "." if(Path(__file__).parent == "<stdin>") else Path(__file__).parent
+    path = Path(sys.argv[1]) if len(sys.argv) > 1 else current
 
     print(f"[{__Color.blue('Start')}: {filename}]")
     print()
