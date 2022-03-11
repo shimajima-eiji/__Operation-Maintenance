@@ -1,3 +1,4 @@
+import copy
 from multiprocessing import Pool
 import re
 import shutil
@@ -181,10 +182,12 @@ def __create_image(path, to):
         webp = __watermark(webp)
 
     # webpに変換して保存する
+    webp.save(to.with_suffix(path.suffix),
+              path.suffix[1:], quality=95, optimize=True)
     webp.save(to, 'webp', quality=95, optimize=True)
 
     # 適切なサイズにリサイズする
-    def save(image, path, width, height, tag):
+    def save(image, path, width, height, tag, suffix):
         # 縦画像の場合は比率を入れ替える
         if(image.width < image.height):
             width, height = height, width
@@ -198,31 +201,37 @@ def __create_image(path, to):
             return
 
         image.thumbnail(size=(width, height))
-        path = f"{path.parent / path.stem}_{tag}{path.suffix}"
+        path = Path(f"{path.parent / path.stem}_{tag}{path.suffix}")
+        image.save(path.with_suffix(suffix),
+                   suffix[1:], quality=95, optimize=True)
         image.save(path, 'webp', quality=95, optimize=True)
 
     # いくつかの画像パターンに合わせて作成する
     # 画面サイズ
     # 16:9
-    save(webp, to, 1920, 1080, "fullHD")
-    save(webp, to, 1280, 720, "HDTV")
+    tmp_image = copy.deepcopy(webp)
+    save(tmp_image, to, 1920, 1080, "fullHD", path.suffix)
+    save(tmp_image, to, 1280, 720, "HDTV", path.suffix)
 
     # 4:3
-    save(webp, to, 1024, 768, "XGA")
-    save(webp, to, 800, 600, "SVGA")
-    save(webp, to, 640, 480, "VGA")
-    save(webp, to, 480, 360, "VGA")
-    save(webp, to, 360, 240, "QVGA")
-
-    # wordpress
-    save(webp, to, 720, 640, "blog")
+    tmp_image = copy.deepcopy(webp)
+    save(tmp_image, to, 1024, 768, "XGA", path.suffix)
+    save(tmp_image, to, 800, 600, "SVGA", path.suffix)
+    save(tmp_image, to, 640, 480, "VGA", path.suffix)
+    save(tmp_image, to, 480, 360, "VGA", path.suffix)
+    save(tmp_image, to, 360, 240, "QVGA", path.suffix)
 
     # 1:1 アイコン
-    save(webp, to, 512, 512, "icon_large")
-    save(webp, to, 256, 256, "icon")
-    save(webp, to, 128, 128, "icon_small")
-    save(webp, to, 64, 64, "icon_mini")
-    save(webp, to, 16, 16, "favicon")
+    tmp_image = copy.deepcopy(webp)
+    save(tmp_image, to, 512, 512, "icon_large", ".png")
+    save(tmp_image, to, 256, 256, "icon", ".png")
+    save(tmp_image, to, 128, 128, "icon_small", ".png")
+    save(tmp_image, to, 64, 64, "icon_mini", ".png")
+    save(tmp_image, to, 16, 16, "favicon", ".ico")
+
+    # wordpress
+    tmp_image = copy.deepcopy(webp)
+    save(tmp_image, to, 720, 640, "blog", path.suffix)
 
 
 def __main(path):
