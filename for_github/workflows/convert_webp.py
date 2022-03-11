@@ -167,10 +167,6 @@ def __create_image(path, to):
     webp = Image.new(base.mode, base.size).convert('RGBA')
     webp.putdata(base.getdata())
 
-    # 適切なサイズにリサイズする
-    # ウォーターマークの処理負担軽減のため、リサイズはウォーターマークの前に実施する
-    webp.thumbnail(size=(720, 640))
-
     # リサイズ時に縦画像を横に変換してしまうため、回転処理を入れる。
     # 回転処理は元画像のexif情報から取得する
     exif = base._getexif()
@@ -187,13 +183,54 @@ def __create_image(path, to):
     # webpに変換して保存する
     webp.save(to, 'webp', quality=95, optimize=True)
 
+    # 適切なサイズにリサイズする
+    def save(image, path, width, height, tag):
+        # 縦画像の場合は比率を入れ替える
+        if(image.width < image.height):
+            width, height = height, width
+
+        # 指定サイズに満たない場合はやらない
+        if(image.width < width and image.height < height):
+            return
+
+        # アイコンなのに正方形じゃない場合もやらない
+        if("con" in tag and image.width != image.height):
+            return
+
+        image.thumbnail(size=(width, height))
+        path = f"{path.parent / path.stem}_{tag}{path.suffix}"
+        image.save(path, 'webp', quality=95, optimize=True)
+
+    # いくつかの画像パターンに合わせて作成する
+    # 画面サイズ
+    # 16:9
+    save(webp, to, 1920, 1080, "fullHD")
+    save(webp, to, 1280, 720, "HDTV")
+
+    # 4:3
+    save(webp, to, 1024, 768, "XGA")
+    save(webp, to, 800, 600, "SVGA")
+    save(webp, to, 640, 480, "VGA")
+    save(webp, to, 480, 360, "VGA")
+    save(webp, to, 360, 240, "QVGA")
+
+    # wordpress
+    save(webp, to, 720, 640, "blog")
+
+    # 1:1 アイコン
+    save(webp, to, 512, 512, "icon_large")
+    save(webp, to, 256, 256, "icon")
+    save(webp, to, 128, 128, "icon_small")
+    save(webp, to, 64, 64, "icon_mini")
+    save(webp, to, 16, 16, "favicon")
+
 
 def __main(path):
     webp = Path(path.parent / "webp" / (path.stem + ".webp"))
     # 既にwebpが存在する場合はやらない。前段
     if(path.with_suffix(".webp").is_file() or webp.is_file()):
         return False
-    print(f"[Run] {f}")
+    print(f"[Run] {path}")
 
     # 格納先のディレクトリを作成
     base = Path(path.parent / "base" / path.name)
