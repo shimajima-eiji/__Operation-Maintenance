@@ -1,7 +1,9 @@
 /**
  * 定義
  */
-const GAS_ID = "(https://github.com/shimajima-eiji/--GAS_v5_Translate をpullしたプロジェクトのデプロイURL)"
+
+// const GAS_ID = "AKfycbzs-vjq61m2rQALg02rU3iU-2XRlKwMD-eF4pxeknLsp_HyMwUHGh_tJl3xObhH2Ogu"
+const GAS_ID = "AKfycbz-FzDX4vpE7VfRRDnY6Esvpw7R_sywmIEjCBkDeyWh3PGxvGDmOnc-EqbexwkH73Nq"
 
 const endpoint = `https://script.google.com/macros/s/${GAS_ID}/exec`
 let __getEBI = (id) => document.getElementById(id);
@@ -31,7 +33,7 @@ convert.addEventListener("click", async () => {
   to.placeholder = '翻訳中…';
 
   // 可変部分はtextだけなので、雛形を作っておく
-  const fix_url = `${endpoint}?source=${source.value}&target=${target.value}&by=Operation-Maintenanceで使用&text=${from.value.split('\n').join('&text=')}`
+  const fix_url = `${endpoint}?source=${source.value}&target=${target.value}&by=自分で拡張機能を使った&text=${from.value.split('\n').join('&text=')}`
   const response = await fetch(fix_url);
   let result = await response.json();
   to.value = result.translates.join('\n');
