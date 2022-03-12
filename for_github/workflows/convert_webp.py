@@ -186,6 +186,8 @@ def __create_image(path, origin, to, icon):
         if(len(tag) > 0):
             tag = f"_{tag}"
 
+        # jpegを変換する際に必要。pngに影響がないのでそのまま採用する
+        image.convert("RGB")
         image.save(path.with_stem(f"{path.stem}{tag}"),
                    path.suffix[1:], quality=95, optimize=True)
         if(to is not None):
@@ -238,9 +240,9 @@ def __create_image(path, origin, to, icon):
 
 def __main(path):
     base = Path(f"{path.parent}/base/{path.name}")
-    webp = Path(f"{path.parent}/webp/{path.stem}.webp")
-    origin = Path(f"{path.parent}/origin/{path.name}")
-    icon = Path(f"{path.parent}/icon/{path.stem}.ico")
+    webp = Path(f"{path.parent}/webp/{path.stem}/{path.stem}.webp")
+    origin = Path(f"{path.parent}/origin/{path.stem}/{path.name}")
+    icon = Path(f"{path.parent}/icon/{path.stem}/{path.stem}.ico")
 
     # 同一ディレクトリにwebpが存在する場合はやらない
     if(path.with_suffix(".webp").is_file()
@@ -255,9 +257,9 @@ def __main(path):
 
     # 格納先のディレクトリを作成
     base.parent.mkdir(exist_ok=True)
-    origin.parent.mkdir(exist_ok=True)
-    webp.parent.mkdir(exist_ok=True)
-    icon.parent.mkdir(exist_ok=True)
+    origin.parent.mkdir(parents=True, exist_ok=True)
+    webp.parent.mkdir(parents=True, exist_ok=True)
+    icon.parent.mkdir(parents=True, exist_ok=True)
 
     # 画像生成
     __create_image(path, origin, webp, icon)
@@ -299,7 +301,9 @@ if __name__ == "__main__":
             # 変換済みのファイルを格納したディレクトリは対象外
             if file.parent.name != "base"
             if file.parent.name != "origin"
+            if file.parent.parent.name != "origin"
             if file.parent.name != "icon"
+            if file.parent.parent.name != "icon"
         ])][0]
         if len(result) == result.count(False):
             print(f"[{__Color.white('Information')}] ディレクトリパスは既に変換済みか、ファイルが存在しない]")
