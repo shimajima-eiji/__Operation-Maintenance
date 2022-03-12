@@ -161,7 +161,7 @@ ROTATE = {
 }
 
 
-def __create_image(path, origin, to):
+def __create_image(path, origin, to, icon):
     base = Image.open(path)
 
     # Exifを削除するため新しく画像を生成する。見た目を変えないため元画像から情報をコピー。
@@ -182,20 +182,20 @@ def __create_image(path, origin, to):
         webp = __watermark(webp)
 
     # webpに変換して保存する
-    def save(image, origin, to=None, tag=""):
+    def save(image, path, *trash, to=None, tag=""):
         if(len(tag) > 0):
             tag = f"_{tag}"
 
-        image.save(origin.with_stem(
-            f"{origin.stem}{tag}"), origin.suffix[1:], quality=95, optimize=True)
+        image.save(path.with_stem(f"{path.stem}{tag}"),
+                   path.suffix[1:], quality=95, optimize=True)
         if(to is not None):
-            image.save(to.with_stem(
-                f"{to.stem}{tag}"), to.suffix[1:], quality=95, optimize=True)
-    save(webp, origin, to)
+            image.save(to.with_stem(f"{to.stem}{tag}"),
+                       to.suffix[1:], quality=95, optimize=True)
+    save(webp, origin, to=to)
 
     # 適切なサイズにリサイズする
-    def resize(object, width, height, tag, origin, to=None):
-        image = copy.deepcopy(object)
+    def resize(base, width, height, tag, origin, to=None):
+        image = copy.deepcopy(base)
 
         # 縦画像の場合は比率を入れ替える
         if(image.width < image.height):
@@ -218,42 +218,49 @@ def __create_image(path, origin, to):
     resize(webp, 1920, 1080, "fullHD", origin, to)
     resize(webp, 1280, 720, "HDTV", origin, to)
 
-    # # 4:3
+    # 4:3
+    resize(webp, 1280, 960, "QXGA", origin, to)
     resize(webp, 1024, 768, "XGA", origin, to)
     resize(webp, 800, 600, "SVGA", origin, to)
-    resize(webp, 640, 480, "VGA", origin, to)
     resize(webp, 480, 360, "VGA", origin, to)
     resize(webp, 360, 240, "QVGA", origin, to)
 
-    # # wordpress
-    resize(webp, 720, 640, "blog", origin, to)
-
-    # # 1:1 アイコン
-    icon = Path(path.parent / "icon" / (path.stem + ".webp"))
+    # 1:1 アイコン
     resize(webp, 512, 512, "icon_large", icon)
     resize(webp, 256, 256, "icon", icon)
     resize(webp, 128, 128, "icon_small", icon)
     resize(webp, 64, 64, "icon_mini", icon)
     resize(webp, 16, 16, "favicon", icon)
 
+    # wordpress
+    resize(webp, 720, 640, "blog", origin, to)
+
 
 def __main(path):
-    webp = Path(path.parent / "webp" / (path.stem + ".webp"))
-    # 既にwebpが存在する場合はやらない。originがある時はwebpもあるので、どちらかで判定すれば良い
-    if(path.with_suffix(".webp").is_file() or webp.is_file()):
+    base = Path(f"{path.parent}/base/{path.name}")
+    webp = Path(f"{path.parent}/webp/{path.stem}.webp")
+    origin = Path(f"{path.parent}/origin/{path.name}")
+    icon = Path(f"{path.parent}/icon/{path.stem}.ico")
+
+    # 同一ディレクトリにwebpが存在する場合はやらない
+    if(path.with_suffix(".webp").is_file()
+        # 変換済みのファイルが存在する場合はやらない
+        or base.is_file()
+        or webp.is_file()
+        or origin.is_file()
+        or icon.is_file()
+       ):
         return False
     print(f"[Run] {path}")
 
     # 格納先のディレクトリを作成
-    base = Path(path.parent / "base" / path.name)
-    origin = Path(path.parent / "origin" / path.name)
-
     base.parent.mkdir(exist_ok=True)
     origin.parent.mkdir(exist_ok=True)
     webp.parent.mkdir(exist_ok=True)
+    icon.parent.mkdir(exist_ok=True)
 
     # 画像生成
-    __create_image(path, origin, webp)
+    __create_image(path, origin, webp, icon)
     shutil.move(path, base)
 
     print(f"[{__Color.green('Success')}] {path} -> {webp}")
@@ -284,19 +291,18 @@ if __name__ == "__main__":
         # 画像ファイル以外と、baseディレクトリのファイルは除外する。
         # 既に変換されているかサーチして処理するのが手間だったので、convert内で実施している
         p = Pool(os.cpu_count())
-        result = [
-            p.map(__main, [
-                file for file in path.glob('**/*')
-                # 画像ファイルかどうか検出
-                if re.search(f"/*({'|'.join(execute_suffix)})", str(file))
-                # baseディレクトリとoriginディレクトリを親にしている場合、変換済みのファイルが置いてあるので処理しない
-                if file.parent.name != "base"
-                if file.parent.name != "origin"
-            ])
-        ][0]
+        result = [p.map(__main, [
+            file for file in path.glob('**/*')
+            # 画像拡張子でなければやらない
+            if re.search(f"/*({'|'.join(execute_suffix)})", str(file))
+
+            # 変換済みのファイルを格納したディレクトリは対象外
+            if file.parent.name != "base"
+            if file.parent.name != "origin"
+            if file.parent.name != "icon"
+        ])][0]
         if len(result) == result.count(False):
-            print(
-                f"[{__Color.white('Information')}] ディレクトリパスは既に変換済みか、ファイルが存在しない]")
+            print(f"[{__Color.white('Information')}] ディレクトリパスは既に変換済みか、ファイルが存在しない]")
 
     # 画像ではないファイルか、ファイルでもディレクトリでもない場合
     else:
