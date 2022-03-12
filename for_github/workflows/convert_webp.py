@@ -237,16 +237,23 @@ def __create_image(path, origin, to, icon):
 
 
 def __main(path):
+    base = Path(f"{path.parent}/base/{path.name}")
     webp = Path(f"{path.parent}/webp/{path.stem}.webp")
-    origin = Path(f"{path.parent}/origin/{path.stem}{path.suffix}")
+    origin = Path(f"{path.parent}/origin/{path.name}")
     icon = Path(f"{path.parent}/icon/{path.stem}.ico")
-    # 既にwebpが存在する場合はやらない。前段
-    if(path.with_suffix(".webp").is_file() or webp.is_file()):
+
+    # 同一ディレクトリにwebpが存在する場合はやらない
+    if(path.with_suffix(".webp").is_file()
+        # 変換済みのファイルが存在する場合はやらない
+        or base.is_file()
+        or webp.is_file()
+        or origin.is_file()
+        or icon.is_file()
+       ):
         return False
     print(f"[Run] {path}")
 
     # 格納先のディレクトリを作成
-    base = Path(path.parent / "base" / path.name)
     base.parent.mkdir(exist_ok=True)
     origin.parent.mkdir(exist_ok=True)
     webp.parent.mkdir(exist_ok=True)
@@ -254,7 +261,7 @@ def __main(path):
 
     # 画像生成
     __create_image(path, origin, webp, icon)
-    # shutil.move(path, base)
+    shutil.move(path, base)
 
     print(f"[{__Color.green('Success')}] {path} -> {webp}")
     return True
