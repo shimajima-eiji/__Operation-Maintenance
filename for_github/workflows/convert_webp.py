@@ -187,9 +187,8 @@ def __create_image(path, origin, to, icon):
             tag = f"_{tag}"
 
         # jpegを変換する際に必要。pngに影響がないのでそのまま採用する
-        image.convert("RGB")
-        image.save(path.with_stem(f"{path.stem}{tag}"),
-                   path.suffix[1:], quality=95, optimize=True)
+        image.convert("RGB").save(path.with_stem(f"{path.stem}{tag}"),
+                                  path.suffix[1:], quality=95, optimize=True)
         if(to is not None):
             image.save(to.with_stem(f"{to.stem}{tag}"),
                        to.suffix[1:], quality=95, optimize=True)
