@@ -6,6 +6,7 @@ import sys
 ## 引数
 - current_directory(current path): ファイル走査をするディレクトリ。後述の構成を想定している
 - output_path(output.html): 結果を出力するファイル。.mdを作る
+- note(Null): 本スクリプトを使用するにあたっての備考情報。同じ情報が使われるので、何らかの処理をしたいならforkして独自に書き換える
 
 ## 使い方
 ```
@@ -44,6 +45,7 @@ windowsを想定しているのでフォルダーと表記しておくが、デ�
 current_directory = Path(sys.argv[1] if len(sys.argv) > 1 and Path(
     sys.argv[1]).is_dir() else Path().cwd())
 output_path = Path(sys.argv[2] if len(sys.argv) > 2 else "output.html")
+note = sys.argv[3] if len(sys.argv) > 3 else ""
 
 output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -144,14 +146,14 @@ for path in current_directory.glob("**"):
     # print(path)
 
 # 構築
-html = [f"<tr><td>{categories[i]}</td><td>{g}</td></tr>" for i,
+html = [f"<tr><td>{categories[i]}</td><td>{g}</td><td>{note}</td></tr>" for i,
         g in enumerate(games)]
-markdown = [f"|{categories[i]}|{g}|" for i,
+markdown = [f"|{categories[i]}|{g}|{note}|" for i,
             g in enumerate(games)]
 
 with output_path.open(mode="w") as f:
     f.write(
-        f"<table><tr><th>カテゴリー</th><th>タイトル</th></tr>{''.join(html)}</table>")
+        f"<table><tr><th>カテゴリー</th><th>タイトル</th><th>備考</th></tr>{''.join(html)}</table>")
 
 with output_path.with_suffix(".md").open(mode="w") as f:
-    f.write("|カテゴリー|タイトル|\n|---|---|\n" + '\n'.join(markdown))
+    f.write("|カテゴリー|タイトル|備考|\n|---|---|---|\n" + '\n'.join(markdown))
