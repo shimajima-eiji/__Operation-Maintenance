@@ -3,9 +3,15 @@ import sys
 
 """
 # README.md
-## params
+## 引数
 - current_directory(current path): ファイル走査をするディレクトリ。後述の構成を想定している
 - output_path(output.html): 結果を出力するファイル。.mdを作る
+
+## 使い方
+```
+curl https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenance/main/for_manage/localfile2html.py > localfile2html.py
+python localfile2html.py (走査するパス) （結果の出力先）
+```
 
 ## ゲームファイルのディレクトリ構成
 windowsを想定しているのでフォルダーと表記しておくが、ディレクトリと同じ。
