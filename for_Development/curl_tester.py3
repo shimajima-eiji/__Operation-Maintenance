@@ -11,7 +11,7 @@ try:
   print(__file__ == "<stdin>")
   print(sys.argv[0])
   print(Path(__file__).cwd())
-  [print(p) for p in Path(__file__).glob("**/*")]
+  [print(f"パス: {p}\n") for p in Path(__file__).glob("**/*")]
 except Error:
   print("pathlibのインポートエラー")
 
