@@ -6,6 +6,8 @@ curl -sf https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenanc
 """
 try:
   from pathlib import Path
+  print(__file__)
+  print(type(__file__))
   print(Path(__file__).cwd())
 except Error:
   print("pathlibのインポートエラー")
