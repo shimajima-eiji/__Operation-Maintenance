@@ -187,10 +187,12 @@ def __create_image(path, origin, to, icon):
             tag = f"_{tag}"
 
         # jpegを変換する際に必要。pngに影響がないのでそのまま採用する
-        print(path, type(path))
-        image.convert('RGB').save(path.with_stem(f"{path.stem}{tag}"),
+        try:
+            image.convert('RGB').save(path.with_stem(f"{path.stem}{tag}"),
                                   None, quality=95, optimize=True)
-
+        except:
+            print(path, type(path))
+            
         if(to is not None):
             image.save(to.with_stem(f"{to.stem}{tag}"),
                        to.suffix[1:], quality=95, optimize=True)
@@ -274,7 +276,7 @@ def __main(path):
 if __name__ == "__main__":
     # 引数処理
     # `curl | python`で実施した場合、else時はカレントディレクトリを返す
-    filename = "curl script" if sys.argv == "" else sys.argv[0]
+    filename = "curl script" if sys.argv[0] == "" else sys.argv[0]
     # 引数があればそれを、なければこのファイルと同じディレクトリを走査
     path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).cwd()
 
