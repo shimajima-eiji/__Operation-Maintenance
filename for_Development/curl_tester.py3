@@ -4,10 +4,12 @@ curlで動いているかどうかを調べるためのテスター
 curl -sf https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenance/main/for_Development/curl_tester.py3 | python
 ```
 """
+import sys
 try:
   from pathlib import Path
   print(__file__)
   print(__file__ == "<stdin>")
+  print(sys.argv)
   print(Path(__file__).cwd())
 except Error:
   print("pathlibのインポートエラー")
