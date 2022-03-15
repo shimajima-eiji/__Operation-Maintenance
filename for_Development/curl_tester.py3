@@ -1,13 +1,13 @@
 """
 curlで動いているかどうかを調べるためのテスター
 ```
-curl -sf https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenance/main/curl_tester.py3 | python
+curl -sf https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenance/main/for_Development/curl_tester.py3 | python
 ```
 """
 try:
   from pathlib import Path
   print(__file__)
-  print(type(__file__))
+  print(__file__ == "<stdin>")
   print(Path(__file__).cwd())
 except Error:
   print("pathlibのインポートエラー")
