@@ -194,8 +194,12 @@ def __create_image(path, origin, to, icon):
             print(path, type(path))
             
         if(to is not None):
-            image.save(to.with_stem(f"{to.stem}{tag}"),
+            try:
+                image.save(to.with_stem(f"{to.stem}{tag}"),
                        to.suffix[1:], quality=95, optimize=True)
+            except:
+                print(to, type(to))
+                
     save(webp, origin, to=to)
 
     # 適切なサイズにリサイズする
