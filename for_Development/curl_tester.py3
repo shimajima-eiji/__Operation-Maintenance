@@ -9,8 +9,9 @@ try:
   from pathlib import Path
   print(__file__)
   print(__file__ == "<stdin>")
-  print(sys.argv)
+  print(sys.argv[0])
   print(Path(__file__).cwd())
+  [print(p) for p in Path(__file__).glob("**/*")]
 except Error:
   print("pathlibのインポートエラー")
 
