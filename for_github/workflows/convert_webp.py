@@ -276,7 +276,7 @@ if __name__ == "__main__":
     # `curl | python`で実施した場合、else時はカレントディレクトリを返す
     filename = "curl script" if sys.argv[0] == "" else sys.argv[0]
     # 引数があればそれを、なければこのファイルと同じディレクトリを走査
-    path = Path(sys.argv[1]) if len(sys.argv) > 1 else "."
+    path = Path((sys.argv[1]) if len(sys.argv) > 1 else ".")
 
     print(f"[{__Color.blue('Start')}: {filename}]")
     print()
