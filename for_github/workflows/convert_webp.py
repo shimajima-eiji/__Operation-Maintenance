@@ -1,14 +1,11 @@
 import copy
-from multiprocessing import Pool
 import re
 import shutil
 from PIL import Image, ImageDraw, ImageFont  # pip pillow
 from pathlib import Path  # pip pathlib
 import sys
-import os
 from box import Box  # pip python-box
 import math
-import glob
 
 """
 # 環境構築
@@ -23,7 +20,7 @@ python convert_webp.py (パス)
 rm convert_webp.py
 ```
 
-## 補足
+## エラーパターン
 本来であれば、以下の方法でも問題はなかった。
 
 ```
@@ -40,6 +37,8 @@ curlで実行してみたところ、Path.globでエラーになった。
 if(__file__ == "<stdin>"):
     quit()
 ```
+
+同様に、処理に失敗したらデッドロックするため、マルチプロセスは廃止
 
 # FYI
 - class Color: https://www.nomuramath.com/kv8wr0mp/
@@ -180,7 +179,23 @@ ROTATE = {
 }
 
 
-def __create_image(path, origin, to, icon):
+def __create_image(path):
+    base = Path(f"{path.parent}/base/{path.name}")
+    origin = Path(f"{path.parent}/origin/{path.stem}/{path.name}")
+    to = Path(f"{path.parent}/webp/{path.stem}/{path.stem}.webp")
+    icon = Path(f"{path.parent}/icon/{path.stem}/{path.stem}.ico")
+
+    # 同一ディレクトリにwebpが存在する場合はやらない
+    if(path.with_suffix(".webp").is_file()
+        # 変換済みのファイルが存在する場合はやらない
+        or base.is_file()
+        or to.is_file()
+        or origin.is_file()
+        or icon.is_file()
+       ):
+        return False
+    print(f"[Run] {path}")
+
     base = Image.open(path)
 
     # Exifを削除するため新しく画像を生成する。見た目を変えないため元画像から情報をコピー。
@@ -189,12 +204,16 @@ def __create_image(path, origin, to, icon):
 
     # リサイズ時に縦画像を横に変換してしまうため、回転処理を入れる。
     # 回転処理は元画像のexif情報から取得する
-    exif = base._getexif()
+    try:
+        exif = base._getexif()
 
-    # exifが取れた時は回転させる
-    if not exif is None:
-        orientation = exif.get(0x112, 1)
-        webp = ROTATE[orientation](webp)
+        # exifが取れた時は回転させる
+        if not exif is None:
+            orientation = exif.get(0x112, 1)
+            webp = ROTATE[orientation](webp)
+
+    except:
+        print(f"[Skip] Can't clear exif.: {path}")
 
     # ウォーターマークを入れる
     if path.parent.name != "nomark":
@@ -213,6 +232,8 @@ def __create_image(path, origin, to, icon):
             image.convert('RGB').save(to.with_stem(f"{to.stem}{tag}"),
                                       None, quality=95, optimize=True)
 
+    origin.parent.mkdir(parents=True, exist_ok=True)
+    to.parent.mkdir(parents=True, exist_ok=True)
     save(webp, origin, to=to)
 
     # 適切なサイズにリサイズする
@@ -248,6 +269,7 @@ def __create_image(path, origin, to, icon):
     resize(webp, 360, 240, "QVGA", origin, to)
 
     # 1:1 アイコン
+    icon.parent.mkdir(parents=True, exist_ok=True)
     resize(webp, 512, 512, "icon_large", icon)
     resize(webp, 256, 256, "icon", icon)
     resize(webp, 128, 128, "icon_small", icon)
@@ -256,36 +278,19 @@ def __create_image(path, origin, to, icon):
 
     # wordpress
     resize(webp, 720, 640, "blog", origin, to)
+    print(f"[{__Color.green('Success')}] {path} -> {to}")
 
 
 def __main(path):
-    base = Path(f"{path.parent}/base/{path.name}")
-    webp = Path(f"{path.parent}/webp/{path.stem}/{path.stem}.webp")
-    origin = Path(f"{path.parent}/origin/{path.stem}/{path.name}")
-    icon = Path(f"{path.parent}/icon/{path.stem}/{path.stem}.ico")
-
-    # 同一ディレクトリにwebpが存在する場合はやらない
-    if(path.with_suffix(".webp").is_file()
-        # 変換済みのファイルが存在する場合はやらない
-        or base.is_file()
-        or webp.is_file()
-        or origin.is_file()
-        or icon.is_file()
-       ):
-        return False
-    print(f"[Run] {path}")
-
-    # 格納先のディレクトリを作成
-    base.parent.mkdir(exist_ok=True)
-    origin.parent.mkdir(parents=True, exist_ok=True)
-    webp.parent.mkdir(parents=True, exist_ok=True)
-    icon.parent.mkdir(parents=True, exist_ok=True)
-
     # 画像生成
-    __create_image(path, origin, webp, icon)
-    shutil.move(path, base)
+    try:
+        __create_image(path)
+        path.parent.mkdir(exist_ok=True)
+        shutil.move(path, path)
 
-    print(f"[{__Color.green('Success')}] {path} -> {webp}")
+    except:
+        print(f"[Skip] Can't convert.: {path}")
+
     return True
 
 
@@ -300,7 +305,7 @@ print()
 
 # パスが画像ファイルならピンポイントに変換
 execute_suffix = [".jpg", ".JPG", ".jpeg", "JPEG",
-                  ".png", ".PNG", ".gif", ".GIF", ".bmp", ".BMP"]
+                  ".png", ".PNG", ".bmp", ".BMP"]
 if(path.is_file() and path.suffix in execute_suffix):
     __main(path)
 
@@ -310,9 +315,8 @@ elif(path.is_dir()):
 
     # 画像ファイル以外と、baseディレクトリのファイルは除外する。
     # 既に変換されているかサーチして処理するのが手間だったので、convert内で実施している
-    p = Pool(os.cpu_count())
-    result = [p.map(__main, [
-        file for file in path.glob('**/*')
+    result = [
+        __main(file) for file in path.glob('**/*')
         # 画像拡張子でなければやらない
         if re.search(f"/*({'|'.join(execute_suffix)})", str(file))
 
@@ -322,8 +326,8 @@ elif(path.is_dir()):
         if file.parent.parent.name != "origin"
         if file.parent.name != "icon"
         if file.parent.parent.name != "icon"
-    ])][0]
-    if len(result) == result.count(False):
+    ]
+    if len(result) > 0:
         print(f"[{__Color.white('Information')}] ディレクトリパスは既に変換済みか、ファイルが存在しない]")
 
 # 画像ではないファイルか、ファイルでもディレクトリでもない場合
