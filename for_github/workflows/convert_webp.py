@@ -240,6 +240,8 @@ def __create_image(path, origin, to, icon):
 
 
 def __main(path):
+    print(f"デバッグデバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
+
     base = Path(f"{path.parent}/base/{path.name}")
     webp = Path(f"{path.parent}/webp/{path.stem}/{path.stem}.webp")
     origin = Path(f"{path.parent}/origin/{path.stem}/{path.name}")
@@ -284,7 +286,6 @@ if __name__ == "__main__":
     # パスが画像ファイルならピンポイントに変換
     execute_suffix = [".jpg", ".JPG", ".jpeg", "JPEG",
                       ".png", ".PNG", ".gif", ".GIF", ".bmp", ".BMP"]
-    print("デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
     if(path.is_file() and path.suffix in execute_suffix):
         __main(path)
 
