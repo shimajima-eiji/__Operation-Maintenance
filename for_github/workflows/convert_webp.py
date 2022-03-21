@@ -297,7 +297,7 @@ if __name__ == "__main__":
         # 既に変換されているかサーチして処理するのが手間だったので、convert内で実施している
         p = Pool(os.cpu_count())
         print(f"デバッグデバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
-        file for file in path.glob('**/*'):
+        for file in path.glob('**/*'):
             print(file)
 #         result = [p.map(__main, [
 #             file for file in path.glob('**/*')
