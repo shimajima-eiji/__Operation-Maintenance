@@ -240,7 +240,6 @@ def __create_image(path, origin, to, icon):
 
 
 def __main(path):
-    print(f"デバッグデバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
 
     base = Path(f"{path.parent}/base/{path.name}")
     webp = Path(f"{path.parent}/webp/{path.stem}/{path.stem}.webp")
@@ -296,6 +295,7 @@ if __name__ == "__main__":
         # 画像ファイル以外と、baseディレクトリのファイルは除外する。
         # 既に変換されているかサーチして処理するのが手間だったので、convert内で実施している
         p = Pool(os.cpu_count())
+        print(f"デバッグデバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
         result = [p.map(__main, [
             file for file in path.glob('**/*')
             # 画像拡張子でなければやらない
