@@ -298,7 +298,7 @@ elif(path.is_dir()):
     # 既に変換されているかサーチして処理するのが手間だったので、convert内で実施している
     p = Pool(os.cpu_count())
     print(f"デバッグデバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
-    print(path)
+    print(f"{path} / {__name__}")
     for file in path.glob('**/*'):
         print(f"ループ：{file}")
 #         result = [p.map(__main, [
