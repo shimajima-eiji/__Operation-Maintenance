@@ -314,8 +314,8 @@ elif(path.is_dir()):
 #             if file.parent.parent.name != "icon"
 #         ])][0]
     print(f"デバッグデバッグデバッグデバッグデバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
-    if len(result) == result.count(False):
-        print(f"[{__Color.white('Information')}] ディレクトリパスは既に変換済みか、ファイルが存在しない]")
+#     if len(result) == result.count(False):
+#         print(f"[{__Color.white('Information')}] ディレクトリパスは既に変換済みか、ファイルが存在しない]")
 
 # 画像ではないファイルか、ファイルでもディレクトリでもない場合
 else:
