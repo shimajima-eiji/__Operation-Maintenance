@@ -308,6 +308,7 @@ if __name__ == "__main__":
             if file.parent.name != "icon"
             if file.parent.parent.name != "icon"
         ])][0]
+        print(f"デバッグデバッグデバッグデバッグデバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
         if len(result) == result.count(False):
             print(f"[{__Color.white('Information')}] ディレクトリパスは既に変換済みか、ファイルが存在しない]")
 
