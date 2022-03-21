@@ -263,7 +263,6 @@ def __main(path):
     icon.parent.mkdir(parents=True, exist_ok=True)
 
     # 画像生成
-    print("デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
     __create_image(path, origin, webp, icon)
     shutil.move(path, base)
 
@@ -285,6 +284,7 @@ if __name__ == "__main__":
     # パスが画像ファイルならピンポイントに変換
     execute_suffix = [".jpg", ".JPG", ".jpeg", "JPEG",
                       ".png", ".PNG", ".gif", ".GIF", ".bmp", ".BMP"]
+    print("デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
     if(path.is_file() and path.suffix in execute_suffix):
         __main(path)
 
