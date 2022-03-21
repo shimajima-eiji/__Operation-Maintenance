@@ -32,6 +32,9 @@ rm convert_webp.py
 - const ROTATE: https://qiita.com/Klein/items/a04cf1a6c94d6f03846e
 """
 
+# マルチプロセスで__mp_main__から実行されるので、これを回避するため必須
+if __name__ != "__main__":
+   quit()
 
 class __Color:
 
@@ -272,33 +275,31 @@ def __main(path):
     return True
 
 
-# マルチプロセスで__mp_main__から実行されるので、これを回避するため必須
-if __name__ == "__main__":
-    # 引数処理
-    # `curl | python`で実施した場合、else時はカレントディレクトリを返す
-    filename = "curl script" if sys.argv[0] == "" else sys.argv[0]
-    # 引数があればそれを、なければこのファイルと同じディレクトリを走査
-    path = Path((sys.argv[1]) if len(sys.argv) > 1 else ".")
+# 引数処理
+# `curl | python`で実施した場合、else時はカレントディレクトリを返す
+filename = "curl script" if sys.argv[0] == "" else sys.argv[0]
+# 引数があればそれを、なければこのファイルと同じディレクトリを走査
+path = Path((sys.argv[1]) if len(sys.argv) > 1 else ".")
 
-    print(f"[{__Color.blue('Start')}: {filename}]")
-    print()
+print(f"[{__Color.blue('Start')}: {filename}]")
+print()
 
-    # パスが画像ファイルならピンポイントに変換
-    execute_suffix = [".jpg", ".JPG", ".jpeg", "JPEG",
-                      ".png", ".PNG", ".gif", ".GIF", ".bmp", ".BMP"]
-    if(path.is_file() and path.suffix in execute_suffix):
-        __main(path)
+# パスが画像ファイルならピンポイントに変換
+execute_suffix = [".jpg", ".JPG", ".jpeg", "JPEG",
+                  ".png", ".PNG", ".gif", ".GIF", ".bmp", ".BMP"]
+if(path.is_file() and path.suffix in execute_suffix):
+    __main(path)
 
-    # パスがディレクトリなら以下ファイルを検索する。
-    elif(path.is_dir()):
-        print(f"[{__Color.white('Information')}] ディレクトリサーチ: {path.resolve()}")
+# パスがディレクトリなら以下ファイルを検索する。
+elif(path.is_dir()):
+    print(f"[{__Color.white('Information')}] ディレクトリサーチ: {path.resolve()}")
 
-        # 画像ファイル以外と、baseディレクトリのファイルは除外する。
-        # 既に変換されているかサーチして処理するのが手間だったので、convert内で実施している
-        p = Pool(os.cpu_count())
-        print(f"デバッグデバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
-        for file in path.glob('**/*'):
-            print(file)
+    # 画像ファイル以外と、baseディレクトリのファイルは除外する。
+    # 既に変換されているかサーチして処理するのが手間だったので、convert内で実施している
+    p = Pool(os.cpu_count())
+    print(f"デバッグデバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
+    for file in path.glob('**/*'):
+        print(f"ループ：{file}")
 #         result = [p.map(__main, [
 #             file for file in path.glob('**/*')
 #             # 画像拡張子でなければやらない
@@ -311,13 +312,13 @@ if __name__ == "__main__":
 #             if file.parent.name != "icon"
 #             if file.parent.parent.name != "icon"
 #         ])][0]
-        print(f"デバッグデバッグデバッグデバッグデバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
-        if len(result) == result.count(False):
-            print(f"[{__Color.white('Information')}] ディレクトリパスは既に変換済みか、ファイルが存在しない]")
+    print(f"デバッグデバッグデバッグデバッグデバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
+    if len(result) == result.count(False):
+        print(f"[{__Color.white('Information')}] ディレクトリパスは既に変換済みか、ファイルが存在しない]")
 
-    # 画像ではないファイルか、ファイルでもディレクトリでもない場合
-    else:
-        print(f"[{__Color.yellow('Skip')}] 不正なパス: {path}")
+# 画像ではないファイルか、ファイルでもディレクトリでもない場合
+else:
+    print(f"[{__Color.yellow('Skip')}] 不正なパス: {path}")
 
-    print()
-    print(f"[{__Color.blue('End')}: {filename}]")
+print()
+print(f"[{__Color.blue('End')}: {filename}]")
