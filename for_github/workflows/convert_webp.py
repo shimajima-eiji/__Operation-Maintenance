@@ -299,8 +299,12 @@ elif(path.is_dir()):
     p = Pool(os.cpu_count())
     print(f"デバッグデバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
     print(f"{path} / {__name__}")
-    for file in path.glob('**/*'):
-        print(f"ループ：{file}")
+    for file in glob.glob('**/*', recursive=True):
+         print(file)
+         print(re.search(f"/*({'|'.join(execute_suffix)})", str(file)) is None)
+
+#     for file in path.glob('**/*'):
+#         print(f"ループ：{file}")
 #         result = [p.map(__main, [
 #             file for file in path.glob('**/*')
 #             # 画像拡張子でなければやらない
