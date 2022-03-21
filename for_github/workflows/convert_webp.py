@@ -297,18 +297,20 @@ if __name__ == "__main__":
         # 既に変換されているかサーチして処理するのが手間だったので、convert内で実施している
         p = Pool(os.cpu_count())
         print(f"デバッグデバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
-        result = [p.map(__main, [
-            file for file in path.glob('**/*')
-            # 画像拡張子でなければやらない
-            if re.search(f"/*({'|'.join(execute_suffix)})", str(file))
+        file for file in path.glob('**/*'):
+            print(file)
+#         result = [p.map(__main, [
+#             file for file in path.glob('**/*')
+#             # 画像拡張子でなければやらない
+#             if re.search(f"/*({'|'.join(execute_suffix)})", str(file))
 
-            # 変換済みのファイルを格納したディレクトリは対象外
-            if file.parent.name != "base"
-            if file.parent.name != "origin"
-            if file.parent.parent.name != "origin"
-            if file.parent.name != "icon"
-            if file.parent.parent.name != "icon"
-        ])][0]
+#             # 変換済みのファイルを格納したディレクトリは対象外
+#             if file.parent.name != "base"
+#             if file.parent.name != "origin"
+#             if file.parent.parent.name != "origin"
+#             if file.parent.name != "icon"
+#             if file.parent.parent.name != "icon"
+#         ])][0]
         print(f"デバッグデバッグデバッグデバッグデバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
         if len(result) == result.count(False):
             print(f"[{__Color.white('Information')}] ディレクトリパスは既に変換済みか、ファイルが存在しない]")
