@@ -240,13 +240,11 @@ def __create_image(path, origin, to, icon):
 
 
 def __main(path):
-    if(path.name == "<stdin>"):
-        path = path.parent
     base = Path(f"{path.parent}/base/{path.name}")
     webp = Path(f"{path.parent}/webp/{path.stem}/{path.stem}.webp")
     origin = Path(f"{path.parent}/origin/{path.stem}/{path.name}")
     icon = Path(f"{path.parent}/icon/{path.stem}/{path.stem}.ico")
-
+    
     # 同一ディレクトリにwebpが存在する場合はやらない
     if(path.with_suffix(".webp").is_file()
         # 変換済みのファイルが存在する場合はやらない
@@ -265,6 +263,7 @@ def __main(path):
     icon.parent.mkdir(parents=True, exist_ok=True)
 
     # 画像生成
+    print("デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
     __create_image(path, origin, webp, icon)
     shutil.move(path, base)
 
