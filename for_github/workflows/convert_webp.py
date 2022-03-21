@@ -277,6 +277,8 @@ if __name__ == "__main__":
     filename = "curl script" if sys.argv[0] == "" else sys.argv[0]
     # 引数があればそれを、なければこのファイルと同じディレクトリを走査
     path = Path((sys.argv[1]) if len(sys.argv) > 1 else ".")
+    if(path.name == "<stdin>"):
+        path = path.parent
 
     print(f"[{__Color.blue('Start')}: {filename}]")
     print()
