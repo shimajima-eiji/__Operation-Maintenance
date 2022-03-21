@@ -18,13 +18,27 @@ pip install pillow pathlib python-box
 
 # 使い方
 ```
-curl -sf https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenance/main/for_github/workflows/convert_webp.py | python
-
-# あるいは
-
 curl -sf https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenance/main/for_github/workflows/convert_webp.py >convert_webp.py
 python convert_webp.py (パス)
 rm convert_webp.py
+```
+
+## 補足
+本来であれば、以下の方法でも問題はなかった。
+
+```
+curl -sf https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenance/main/for_github/workflows/convert_webp.py | python
+```
+
+curlで実行してみたところ、Path.globでエラーになった。
+そのため、curlでファイルを格納した上で実施するとこの問題は解消される。
+原因が特定できていないが、ファイルパスが影響する可能性が高い。
+
+差し替えるなら、該当箇所に以下を差し込む。
+
+```
+if(__file__ == "<stdin>"):
+    quit()
 ```
 
 # FYI
@@ -35,7 +49,8 @@ rm convert_webp.py
 
 # マルチプロセスで__mp_main__から実行されるので、これを回避するため必須
 if __name__ != "__main__":
-   quit()
+    quit()
+
 
 class __Color:
 
@@ -193,11 +208,11 @@ def __create_image(path, origin, to, icon):
         # jpegを変換する際に必要。pngに影響がないのでそのまま採用する
         image.convert('RGB').save(path.with_stem(f"{path.stem}{tag}"),
                                   None, quality=95, optimize=True)
-            
+
         if(to is not None):
             image.convert('RGB').save(to.with_stem(f"{to.stem}{tag}"),
-                   None, quality=95, optimize=True)
-                
+                                      None, quality=95, optimize=True)
+
     save(webp, origin, to=to)
 
     # 適切なサイズにリサイズする
@@ -244,13 +259,11 @@ def __create_image(path, origin, to, icon):
 
 
 def __main(path):
-    print(f"デバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
-
     base = Path(f"{path.parent}/base/{path.name}")
     webp = Path(f"{path.parent}/webp/{path.stem}/{path.stem}.webp")
     origin = Path(f"{path.parent}/origin/{path.stem}/{path.name}")
     icon = Path(f"{path.parent}/icon/{path.stem}/{path.stem}.ico")
-    
+
     # 同一ディレクトリにwebpが存在する場合はやらない
     if(path.with_suffix(".webp").is_file()
         # 変換済みのファイルが存在する場合はやらない
@@ -298,29 +311,20 @@ elif(path.is_dir()):
     # 画像ファイル以外と、baseディレクトリのファイルは除外する。
     # 既に変換されているかサーチして処理するのが手間だったので、convert内で実施している
     p = Pool(os.cpu_count())
-    print(f"デバッグデバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
-    print(f"{path} / {__name__}")
-    for file in glob.glob('**/*', recursive=True):
-         print(file)
-         print(re.search(f"/*({'|'.join(execute_suffix)})", str(file)) is None)
+    result = [p.map(__main, [
+        file for file in path.glob('**/*')
+        # 画像拡張子でなければやらない
+        if re.search(f"/*({'|'.join(execute_suffix)})", str(file))
 
-#     for file in path.glob('**/*'):
-#         print(f"ループ：{file}")
-#         result = [p.map(__main, [
-#             file for file in path.glob('**/*')
-#             # 画像拡張子でなければやらない
-#             if re.search(f"/*({'|'.join(execute_suffix)})", str(file))
-
-#             # 変換済みのファイルを格納したディレクトリは対象外
-#             if file.parent.name != "base"
-#             if file.parent.name != "origin"
-#             if file.parent.parent.name != "origin"
-#             if file.parent.name != "icon"
-#             if file.parent.parent.name != "icon"
-#         ])][0]
-    print(f"デバッグデバッグデバッグデバッグデバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
-#     if len(result) == result.count(False):
-#         print(f"[{__Color.white('Information')}] ディレクトリパスは既に変換済みか、ファイルが存在しない]")
+        # 変換済みのファイルを格納したディレクトリは対象外
+        if file.parent.name != "base"
+        if file.parent.name != "origin"
+        if file.parent.parent.name != "origin"
+        if file.parent.name != "icon"
+        if file.parent.parent.name != "icon"
+    ])][0]
+    if len(result) == result.count(False):
+        print(f"[{__Color.white('Information')}] ディレクトリパスは既に変換済みか、ファイルが存在しない]")
 
 # 画像ではないファイルか、ファイルでもディレクトリでもない場合
 else:
