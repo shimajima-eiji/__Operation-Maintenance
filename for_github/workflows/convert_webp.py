@@ -240,6 +240,7 @@ def __create_image(path, origin, to, icon):
 
 
 def __main(path):
+    print(f"デバッグ: {path} :デバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグデバッグ")
 
     base = Path(f"{path.parent}/base/{path.name}")
     webp = Path(f"{path.parent}/webp/{path.stem}/{path.stem}.webp")
