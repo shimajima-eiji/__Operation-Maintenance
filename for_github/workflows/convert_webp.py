@@ -1,3 +1,4 @@
+import os
 import copy
 import re
 import shutil
@@ -16,11 +17,15 @@ pip install pillow pathlib python-box
 # 使い方
 ```
 curl -sf https://raw.githubusercontent.com/shimajima-eiji/__Operation-Maintenance/main/for_github/workflows/convert_webp.py >convert_webp.py
-python convert_webp.py (パス)
+python convert_webp.py (パス) (上書きフラグ)
 rm convert_webp.py
 ```
 
-## エラーパターン
+# パラメータ
+パス(カレント): 検索対象とするファイル・ディレクトリパス。サブディレクトリも参照する
+上書きフラグ(False): 引数があれば変換済みファイルを再変換する
+
+# 開発者向け情報: エラーパターン
 本来であれば、以下の方法でも問題はなかった。
 
 ```
@@ -179,10 +184,12 @@ ROTATE = {
 }
 
 
-def __create_image(path):
-    base = Path(f"{path.parent}/base/{path.name}")
+def __create_image(path, base=None, to=None):
+    if(base is None):
+        base = Path(f"{path.parent}/base/{path.name}")
+    if(to is None):
+        to = Path(f"{path.parent}/webp/{path.stem}/{path.stem}.webp")
     origin = Path(f"{path.parent}/origin/{path.stem}/{path.name}")
-    to = Path(f"{path.parent}/webp/{path.stem}/{path.stem}.webp")
     icon = Path(f"{path.parent}/icon/{path.stem}/{path.stem}.ico")
 
     # 同一ディレクトリにwebpが存在する場合はやらない
@@ -194,18 +201,19 @@ def __create_image(path):
         or icon.is_file()
        ):
         return False
+
     print(f"[Run] {path}")
 
-    base = Image.open(path)
+    image = Image.open(path)
 
     # Exifを削除するため新しく画像を生成する。見た目を変えないため元画像から情報をコピー。
-    webp = Image.new(base.mode, base.size).convert('RGBA')
-    webp.putdata(base.getdata())
+    webp = Image.new(image.mode, image.size).convert('RGBA')
+    webp.putdata(image.getdata())
 
     # リサイズ時に縦画像を横に変換してしまうため、回転処理を入れる。
     # 回転処理は元画像のexif情報から取得する
     try:
-        exif = base._getexif()
+        exif = image._getexif()
 
         # exifが取れた時は回転させる
         if not exif is None:
@@ -277,16 +285,19 @@ def __create_image(path):
     resize(webp, 16, 16, "favicon", icon)
 
     # wordpress
-    resize(webp, 720, 640, "blog", origin, to)
+    resize(webp, 938, 939, "blog_940", origin, to)
+    resize(webp, 720, 721, "blog_720", origin, to)
     print(f"[{__Color.green('Success')}] {path} -> {to}")
+
+    base.parent.mkdir(exist_ok=True)
+    print(f"ファイル移動 {path} / {base}")
+    shutil.move(path, base)
 
 
 def __main(path):
     # 画像生成
     try:
         __create_image(path)
-        path.parent.mkdir(exist_ok=True)
-        shutil.move(path, path)
 
     except:
         print(f"[Skip] Can't convert.: {path}")
@@ -294,11 +305,48 @@ def __main(path):
     return True
 
 
+def retry(path):
+    """
+    再変換フラグがONの場合のみ実施する。baseディレクトリにあるファイルは、初回変換時はbaseディレクトリの上で実施されているので、パスを初回変換時に合わせる
+    """
+    if(path.with_suffix(".webp").is_file()):
+        # print("同一ディレクトリ")
+        base = path
+        to = path.with_suffix(".webp")
+        __create_image(path, base, to)
+        # print(f"同一ディレクトリのケース {path}")
+        # os.rmdir(base.parent)
+
+    elif(path.parent.name == "base" and Path(path.parent.parent / "webp" / path.stem / path.with_suffix(".webp").name).is_file()):
+        # print("現行フォーマット")
+        base = path
+        path = Path(path.parent.parent / path.name)
+        to = Path(path.parent.parent / "webp" /
+                  path.stem / path.with_suffix(".webp").name)
+        shutil.move(base, path)
+        __create_image(path, base, to)
+        # print(f"新フォーマットのケース {base} / {path}")
+        shutil.move(path, base)
+
+    elif(path.parent.name == "base" and Path(path.parent.parent / "webp" / path.with_suffix(".webp").name).is_file()):
+        # print("旧フォーマット")
+        base = path
+        path = Path(path.parent.parent / path.name)
+        to = Path(path.parent.parent / "webp" / path.with_suffix(".webp").name)
+        shutil.move(base, path)
+        __create_image(path, base, to)
+
+        # print(f"旧フォーマットのケース（エラーになる） {base} / {path}")
+
+
 # 引数処理
 # `curl | python`で実施した場合、else時はカレントディレクトリを返す
 filename = "curl script" if sys.argv[0] == "" else sys.argv[0]
 # 引数があればそれを、なければこのファイルと同じディレクトリを走査
 path = Path((sys.argv[1]) if len(sys.argv) > 1 else ".")
+# 引数があれば上書きする
+retry_flag = len(sys.argv) > 2
+_f = retry if(retry_flag) else __main
 
 print(f"[{__Color.blue('Start')}: {filename}]")
 print()
@@ -316,12 +364,12 @@ elif(path.is_dir()):
     # 画像ファイル以外と、baseディレクトリのファイルは除外する。
     # 既に変換されているかサーチして処理するのが手間だったので、convert内で実施している
     result = [
-        __main(file) for file in path.glob('**/*')
+        _f(file) for file in path.glob('**/*')
         # 画像拡張子でなければやらない
         if re.search(f"/*({'|'.join(execute_suffix)})", str(file))
 
         # 変換済みのファイルを格納したディレクトリは対象外
-        if file.parent.name != "base"
+        if file.parent.name != "base" or retry_flag
         if file.parent.name != "origin"
         if file.parent.parent.name != "origin"
         if file.parent.name != "icon"
